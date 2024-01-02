@@ -39,6 +39,9 @@ impl DropCommand {
     ///
     /// let sentence = vec!["drop", "sword"];
     /// let drop = DropCommand::new(sentence);
+    /// assert_eq!(drop.name, "drop");
+    /// assert_eq!(drop.description, "Drops an item from the player's inventory.");
+    /// assert_eq!(drop.target, "sword");
     /// ```
     pub fn new(sentence: Vec<&str>) -> DropCommand {
         DropCommand {
@@ -74,6 +77,9 @@ impl GoCommand {
     ///
     /// let sentence = vec!["go", "north"];
     /// let go = GoCommand::new(sentence);
+    /// assert_eq!(go.name, "go");
+    /// assert_eq!(go.description, "Moves the player to a new location.");
+    /// assert_eq!(go.target, "north");
     /// ```
     pub fn new(sentence: Vec<&str>) -> GoCommand {
         GoCommand {
@@ -109,6 +115,9 @@ impl HelpCommand {
     ///
     /// let sentence = vec!["help"];
     /// let help = HelpCommand::new(sentence);
+    /// assert_eq!(help.name, "help");
+    /// assert_eq!(help.description, "Prints a list of commands or the description of a command.");
+    /// assert_eq!(help.target, None);
     /// ```
     ///
     /// ```
@@ -154,6 +163,9 @@ impl SayCommand {
     ///
     /// let sentence = vec!["say", "hello", "world"];
     /// let say = SayCommand::new(sentence);
+    /// assert_eq!(say.name, "say");
+    /// assert_eq!(say.description, "Prints a message to the screen.");
+    /// assert_eq!(say.target, "hello world");
     /// ```
     pub fn new(sentence: Vec<&str>) -> SayCommand {
         SayCommand {
@@ -189,6 +201,9 @@ impl TakeCommand {
     ///
     /// let sentence = vec!["take", "sword"];
     /// let take = TakeCommand::new(sentence);
+    /// assert_eq!(take.name, "take");
+    /// assert_eq!(take.description, "Takes an item from the current location.");
+    /// assert_eq!(take.target, "sword");
     /// ```
     pub fn new(sentence: Vec<&str>) -> TakeCommand {
         TakeCommand {
