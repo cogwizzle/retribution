@@ -1,5 +1,6 @@
 //! A module that holds the language for the Retribution prompt language.
 
+// TODO Add the main Dungeon World interactions.
 const DROP: &str = "drop";
 const GO: &str = "go";
 const HELP: &str = "help";
@@ -240,21 +241,11 @@ pub fn parse_input(line: &str) -> Command {
     let tokens = tokenize(line);
     let command = tokens[0];
     match command {
-        "drop" => {
-            Command::Drop(DropCommand::new(tokens))
-        },
-        "go" => {
-            Command::Go(GoCommand::new(tokens))
-        },
-        "help" => {
-            Command::Help(HelpCommand::new(tokens))
-        },
-        "say" => {
-            Command::Say(SayCommand::new(tokens))
-        },
-        "take" => {
-            Command::Take(TakeCommand::new(tokens))
-        },
+        "drop" => Command::Drop(DropCommand::new(tokens)),
+        "go" => Command::Go(GoCommand::new(tokens)),
+        "help" => Command::Help(HelpCommand::new(tokens)),
+        "say" => Command::Say(SayCommand::new(tokens)),
+        "take" => Command::Take(TakeCommand::new(tokens)),
         _ => panic!("Command not found."),
     }
 }
