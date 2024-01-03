@@ -1,11 +1,31 @@
 //! A module that holds the language for the Retribution prompt language.
+//! This module should only contain information about the language itself,
+//! and not implementation details about the game.
 
-// TODO Add the main Dungeon World interactions.
+const AID: &str = "aid";
+const ASSIST: &str = "assist";
+const ATTACK: &str = "attack";
+const CAST: &str = "cast";
+const CHARM: &str = "charm";
+const CONSULT: &str = "consult";
+const DEFEND: &str = "defend";
+const DODGE: &str = "dodge";
 const DROP: &str = "drop";
+const ENDURE: &str = "endure";
+const FIGHT: &str = "fight";
 const GO: &str = "go";
 const HELP: &str = "help";
+const HIT: &str = "hit";
+const INTERFERE: &str = "interfere";
+const IMPROVISE: &str = "improvise";
+const PARLEY: &str = "parley";
+const PROTECT: &str = "protect";
 const SAY: &str = "say";
+const SEARCH: &str = "search";
+const SHOOT: &str = "shoot";
+const STUDY: &str = "study";
 const TAKE: &str = "take";
+const VOLLEY: &str = "volley";
 
 /// Tokenize a line of text into a vector of words.
 ///
@@ -13,6 +33,213 @@ const TAKE: &str = "take";
 /// * `line` - A string slice that holds the line of text to tokenize.
 fn tokenize(line: &str) -> Vec<&str> {
     line.split_whitespace().collect()
+}
+
+/// A struct that holds the name, description, and target of a AidCommand.
+///
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string that holds the description of the command.
+/// * `target` - An optional string that holds the target of the command.
+#[derive(Debug)]
+pub struct AidCommand {
+    pub name: String,
+    pub description: String,
+    pub target: String
+}
+
+impl AidCommand {
+    /// Construct new AidCommand.
+    ///
+    /// # Arguments
+    /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::AidCommand;
+    ///
+    /// let sentence = vec!["aid", "ally"];
+    /// let aid = AidCommand::new(sentence);
+    /// assert_eq!(aid.name, "aid");
+    /// assert_eq!(aid.description, "Aid an ally in a fight.");
+    /// assert_eq!(aid.target, "ally");
+    /// ```
+    pub fn new(sentence: Vec<&str>) -> AidCommand {
+        let name = *sentence.first().unwrap_or_else(|| panic!("No command found."));
+        AidCommand {
+            name: String::from(name),
+            description: String::from("Aid an ally in a fight."),
+            target: String::from(sentence[1])
+        }
+    }
+}
+
+/// A struct that holds the name, description, and target of a CastCommand.
+///
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string that holds the description of the command.
+/// * `spell_name` - A string that holds the name of the spell to cast.
+/// * `target` - An optional string that holds the target of the command.
+#[derive(Debug)]
+pub struct CastCommand {
+    pub name: String,
+    pub description: String,
+    pub spell_name: String,
+    pub target: Option<String>
+}
+
+impl CastCommand {
+    /// Construct new CastCommand.
+    ///
+    /// # Arguments
+    /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::CastCommand;
+    ///
+    /// let sentence = vec!["cast", "fireball", "goblin"];
+    /// let cast = CastCommand::new(sentence);
+    /// assert_eq!(cast.name, "cast");
+    /// assert_eq!(cast.description, "Cast a spell.");
+    /// assert_eq!(cast.spell_name, "fireball");
+    /// assert_eq!(cast.target, Some(String::from("goblin")));
+    /// ```
+    pub fn new(sentence: Vec<&str>) -> CastCommand {
+        CastCommand {
+            name: String::from(CAST),
+            description: String::from("Cast a spell."),
+            spell_name: String::from(sentence[1]),
+            target: match sentence.len() {
+                0..=2 => None,
+                _ => Some(String::from(sentence[2]))
+            }
+        }
+    }
+}
+
+/// A struct that holds the name, description, and target of a DefendCommand.
+///
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string that holds the description of the command.
+/// * `target` - A string that holds the target of the command.
+#[derive(Debug)]
+pub struct DefendCommand {
+    pub name: String,
+    pub description: String,
+    pub target: String
+}
+
+impl DefendCommand {
+    /// Construct new DefendCommand.
+    ///
+    /// # Arguments
+    /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::DefendCommand;
+    ///
+    /// let sentence = vec!["defend", "ally"];
+    /// let defend = DefendCommand::new(sentence);
+    /// assert_eq!(defend.name, "defend");
+    /// assert_eq!(defend.description, "Defend an ally in a fight.");
+    /// assert_eq!(defend.target, "ally");
+    /// ```
+    pub fn new(sentence: Vec<&str>) -> DefendCommand {
+        DefendCommand {
+            name: String::from(sentence[0]),
+            description: String::from("Defend an ally in a fight."),
+            target: String::from(sentence[1])
+        }
+    }
+}
+
+/// A struct that holds the name, description, and target of a DefyDangerCommand.
+///
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string that holds the description of the command.
+/// * `target` - An optional string that holds the target of the command.
+/// * `stat` - A string that holds the stat to use for the defy danger roll.
+#[derive(Debug)]
+pub struct DefyDangerCommand {
+    pub name: String,
+    pub description: String,
+    pub target: Option<String>,
+    pub stat: String
+}
+
+impl DefyDangerCommand {
+    /// Construct new DefyDangerCommand.
+    ///
+    /// # Arguments
+    /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
+    /// * `stat` - A string that holds the stat to use for the defy danger roll.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::DefyDangerCommand;
+    ///
+    /// let sentence = vec!["dodge"];
+    /// let dodge = DefyDangerCommand::new(sentence);
+    ///
+    /// assert_eq!(dodge.name, "dodge");
+    /// assert_eq!(dodge.description, "Defy danger using a stat.");
+    /// assert_eq!(dodge.target, None);
+    /// assert_eq!(dodge.stat, "dexterity");
+    ///
+    /// let sentence = vec!["dodge", "goblin"];
+    /// let dodge = DefyDangerCommand::new(sentence);
+    ///
+    /// assert_eq!(dodge.name, "dodge");
+    /// assert_eq!(dodge.description, "Defy danger using a stat.");
+    /// assert_eq!(dodge.target, Some(String::from("goblin")));
+    /// assert_eq!(dodge.stat, "dexterity");
+    ///
+    /// let sentence = vec!["charm", "goblin"];
+    /// let charm = DefyDangerCommand::new(sentence);
+    ///
+    /// assert_eq!(charm.name, "charm");
+    /// assert_eq!(charm.description, "Defy danger using a stat.");
+    /// assert_eq!(charm.target, Some(String::from("goblin")));
+    /// assert_eq!(charm.stat, "charisma");
+    ///
+    /// let sentence = vec!["endure"];
+    /// let endure = DefyDangerCommand::new(sentence);
+    ///
+    /// assert_eq!(endure.name, "endure");
+    /// assert_eq!(endure.description, "Defy danger using a stat.");
+    /// assert_eq!(endure.target, None);
+    /// assert_eq!(endure.stat, "constitution");
+    ///
+    /// let sentence = vec!["improvise"];
+    /// let improvise = DefyDangerCommand::new(sentence);
+    ///
+    /// assert_eq!(improvise.name, "improvise");
+    /// assert_eq!(improvise.description, "Defy danger using a stat.");
+    /// assert_eq!(improvise.target, None);
+    /// assert_eq!(improvise.stat, "intelligence");
+    /// ```
+    pub fn new(sentence: Vec<&str>) -> DefyDangerCommand {
+        let name = sentence[0];
+        DefyDangerCommand {
+            name: String::from(name),
+            description: String::from("Defy danger using a stat."),
+            target: match sentence.len() {
+                1 => None,
+                _ => Some(String::from(sentence[1]))
+            },
+            stat: match name {
+                CHARM => String::from("charisma"),
+                ENDURE => String::from("constitution"),
+                IMPROVISE => String::from("intelligence"),
+                _ => String::from("dexterity") 
+            }
+        }
+    }
 }
 
 /// A struct that holds the name, description, and target of a DropCommand.
@@ -87,6 +314,46 @@ impl GoCommand {
             name: String::from(GO),
             description: String::from("Moves the player to a new location."),
             target: String::from(sentence[1])
+        }
+    }
+}
+
+/// A struct taht holds the name, description, and target of a HackAndSlashCommand.
+/// 
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string that holds the description of the command.
+/// * `target` - An optional string that holds the target of the command.
+
+#[derive(Debug)]
+pub struct HackAndSlashCommand {
+    pub name: String,
+    pub description: String,
+    pub target: Vec<String>
+}
+
+impl HackAndSlashCommand {
+    /// Construct new HackAndSlashCommand.
+    ///
+    /// # Arguments
+    /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::HackAndSlashCommand;
+    ///
+    /// let sentence = vec!["attack", "goblin"];
+    /// let hack = HackAndSlashCommand::new(sentence);
+    /// assert_eq!(hack.name, "attack");
+    /// assert_eq!(hack.description, "Attack an enemy with a melee weapon.");
+    /// assert_eq!(hack.target, vec!["goblin"]);
+    /// ```
+    pub fn new(sentence: Vec<&str>) -> HackAndSlashCommand {
+        let name = *sentence.first().unwrap_or_else(|| panic!("No command found."));
+        HackAndSlashCommand {
+            name: String::from(name),
+            description: String::from("Attack an enemy with a melee weapon."),
+            target: sentence[1..].iter().map(|s| String::from(*s)).collect()
         }
     }
 }
@@ -217,7 +484,12 @@ impl TakeCommand {
 
 /// An enum that holds all of the possible commands.
 pub enum Command {
+    Aid(AidCommand),
+    Cast(CastCommand),
+    Defend(DefendCommand),
+    DefyDanger(DefyDangerCommand),
     Drop(DropCommand),
+    HackAndSlash(HackAndSlashCommand),
     Help(HelpCommand),
     Go(GoCommand),
     Say(SayCommand),
@@ -241,11 +513,16 @@ pub fn parse_input(line: &str) -> Command {
     let tokens = tokenize(line);
     let command = tokens[0];
     match command {
-        "drop" => Command::Drop(DropCommand::new(tokens)),
-        "go" => Command::Go(GoCommand::new(tokens)),
-        "help" => Command::Help(HelpCommand::new(tokens)),
-        "say" => Command::Say(SayCommand::new(tokens)),
-        "take" => Command::Take(TakeCommand::new(tokens)),
+        AID | ASSIST => Command::Aid(AidCommand::new(tokens)),
+        ATTACK | FIGHT | HIT => Command::HackAndSlash(HackAndSlashCommand::new(tokens)),
+        CAST => Command::Cast(CastCommand::new(tokens)),
+        CHARM | DODGE | ENDURE | IMPROVISE => Command::DefyDanger(DefyDangerCommand::new(tokens)),
+        DEFEND | PROTECT => Command::Defend(DefendCommand::new(tokens)),
+        DROP => Command::Drop(DropCommand::new(tokens)),
+        GO => Command::Go(GoCommand::new(tokens)),
+        HELP => Command::Help(HelpCommand::new(tokens)),
+        SAY => Command::Say(SayCommand::new(tokens)),
+        TAKE => Command::Take(TakeCommand::new(tokens)),
         _ => panic!("Command not found."),
     }
 }
@@ -260,6 +537,98 @@ mod tests {
         let sentence = "say hello world";
         let tokens = tokenize(sentence);
         assert_eq!(tokens, vec!["say", "hello", "world"]);
+    }
+
+    /// Test the parse_input function with an aid command.
+    #[test]
+    fn test_parse_aid() {
+        let sentence = "aid ally";
+        let comamnd = parse_input(sentence);
+        match comamnd {
+            Command::Aid(aid) => {
+                assert_eq!(aid.name, "aid");
+                assert_eq!(aid.description, "Aid an ally in a fight.");
+                assert_eq!(aid.target, "ally");
+            },
+            _ => panic!("Aid command expected."),
+        }
+    }
+
+    /// Test the parse_input function with an attack command.
+    #[test]
+    fn test_parse_attack() {
+        let sentence = "attack goblin";
+        let comamnd = parse_input(sentence);
+        match comamnd {
+            Command::HackAndSlash(hack) => {
+                assert_eq!(hack.name, "attack");
+                assert_eq!(hack.description, "Attack an enemy with a melee weapon.");
+                assert_eq!(hack.target, vec!["goblin"]);
+            },
+            _ => panic!("Attack command expected."),
+        }
+    }
+
+    /// Test the parse_input for other hack and slash command.
+    #[test]
+    fn test_parse_hack_and_slash() {
+        let sentence = "fight goblin";
+        let comamnd = parse_input(sentence);
+        match comamnd {
+            Command::HackAndSlash(hack) => {
+                assert_eq!(hack.name, "fight");
+                assert_eq!(hack.description, "Attack an enemy with a melee weapon.");
+                assert_eq!(hack.target, vec!["goblin"]);
+            },
+            _ => panic!("Hack and slash command expected."),
+        }
+    }
+
+    /// Test the parse_input function with a cast command.
+    #[test]
+    fn test_parse_cast() {
+        let sentence = "cast fireball goblin";
+        let comamnd = parse_input(sentence);
+        match comamnd {
+            Command::Cast(cast) => {
+                assert_eq!(cast.name, "cast");
+                assert_eq!(cast.description, "Cast a spell.");
+                assert_eq!(cast.spell_name, "fireball");
+                assert_eq!(cast.target, Some(String::from("goblin")));
+            },
+            _ => panic!("Cast command expected."),
+        }
+    }
+
+    /// Test the parse_input function witha  defend command.
+    #[test]
+    fn test_parse_defend() {
+        let sentence = "protect ally";
+        let comamnd = parse_input(sentence);
+        match comamnd {
+            Command::Defend(defend) => {
+                assert_eq!(defend.name, "protect");
+                assert_eq!(defend.description, "Defend an ally in a fight.");
+                assert_eq!(defend.target, "ally");
+            },
+            _ => panic!("Defend command expected."),
+        }
+    }
+
+    /// Test the parse_input function with a defy danger command.
+    #[test]
+    fn test_parse_defy_danger() {
+        let sentence = "dodge";
+        let comamnd = parse_input(sentence);
+        match comamnd {
+            Command::DefyDanger(defy) => {
+                assert_eq!(defy.name, "dodge");
+                assert_eq!(defy.description, "Defy danger using a stat.");
+                assert_eq!(defy.target, None);
+                assert_eq!(defy.stat, "dexterity");
+            },
+            _ => panic!("Defy danger command expected."),
+        }
     }
 
     /// Test the parse_input function with a drop command.
