@@ -9,6 +9,7 @@ const CAST: &str = "cast";
 const CHARM: &str = "charm";
 const CONSULT: &str = "consult";
 const DEFEND: &str = "defend";
+const DEFY: &str = "defy";
 const DODGE: &str = "dodge";
 const DROP: &str = "drop";
 const ENDURE: &str = "endure";
@@ -177,11 +178,18 @@ impl DefyDangerCommand {
     ///
     /// # Arguments
     /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
-    /// * `stat` - A string that holds the stat to use for the defy danger roll.
     ///
     /// # Examples
     /// ```
     /// use retribution::ret_lang::DefyDangerCommand;
+    ///
+    /// let sentence = vec!["defy", "wizard"];
+    /// let defy = DefyDangerCommand::new(sentence);
+    ///
+    /// assert_eq!(defy.name, "defy");
+    /// assert_eq!(defy.description, "Defy danger using a stat.");
+    /// assert_eq!(defy.target, Some(String::from("wizard")));
+    /// assert_eq!(defy.stat, "wisdom");
     ///
     /// let sentence = vec!["dodge"];
     /// let dodge = DefyDangerCommand::new(sentence);
@@ -234,6 +242,8 @@ impl DefyDangerCommand {
             },
             stat: match name {
                 CHARM => String::from("charisma"),
+                DEFY => String::from("wisdom"),
+                DODGE => String::from("dexterity"),
                 ENDURE => String::from("constitution"),
                 IMPROVISE => String::from("intelligence"),
                 _ => String::from("dexterity") 
@@ -516,7 +526,7 @@ pub fn parse_input(line: &str) -> Command {
         AID | ASSIST => Command::Aid(AidCommand::new(tokens)),
         ATTACK | FIGHT | HIT => Command::HackAndSlash(HackAndSlashCommand::new(tokens)),
         CAST => Command::Cast(CastCommand::new(tokens)),
-        CHARM | DODGE | ENDURE | IMPROVISE => Command::DefyDanger(DefyDangerCommand::new(tokens)),
+        CHARM | DEFY | DODGE | ENDURE | IMPROVISE => Command::DefyDanger(DefyDangerCommand::new(tokens)),
         DEFEND | PROTECT => Command::Defend(DefendCommand::new(tokens)),
         DROP => Command::Drop(DropCommand::new(tokens)),
         GO => Command::Go(GoCommand::new(tokens)),
