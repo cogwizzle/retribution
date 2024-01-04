@@ -2,6 +2,7 @@
 //! This module should only contain information about the language itself,
 //! and not implementation details about the game.
 
+// TODO pick up continuing to implement the commands for DW.
 const AID: &str = "aid";
 const ASSIST: &str = "assist";
 const ATTACK: &str = "attack";
@@ -60,18 +61,21 @@ impl AidCommand {
     /// use retribution::ret_lang::AidCommand;
     ///
     /// let sentence = vec!["aid", "ally"];
-    /// let aid = AidCommand::new(sentence);
+    /// let aid = AidCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     /// assert_eq!(aid.name, "aid");
     /// assert_eq!(aid.description, "Aid an ally in a fight.");
     /// assert_eq!(aid.target, "ally");
     /// ```
-    pub fn new(sentence: Vec<&str>) -> AidCommand {
-        let name = *sentence.first().unwrap_or_else(|| panic!("No command found."));
-        AidCommand {
+    pub fn build(sentence: Vec<&str>) -> Result<AidCommand, &str> {
+        if sentence.len() < 2 {
+            return Err("Not enough arguments for aid command.");
+        }
+        let name = sentence[0];
+        Ok(AidCommand {
             name: String::from(name),
             description: String::from("Aid an ally in a fight."),
             target: String::from(sentence[1])
-        }
+        })
     }
 }
 
@@ -101,14 +105,17 @@ impl CastCommand {
     /// use retribution::ret_lang::CastCommand;
     ///
     /// let sentence = vec!["cast", "fireball", "goblin"];
-    /// let cast = CastCommand::new(sentence);
+    /// let cast = CastCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     /// assert_eq!(cast.name, "cast");
     /// assert_eq!(cast.description, "Cast a spell.");
     /// assert_eq!(cast.spell_name, "fireball");
     /// assert_eq!(cast.target, Some(String::from("goblin")));
     /// ```
-    pub fn new(sentence: Vec<&str>) -> CastCommand {
-        CastCommand {
+    pub fn build(sentence: Vec<&str>) -> Result<CastCommand, &str> {
+        if sentence.len() < 3 {
+            return Err("Not enough arguments for cast command.");
+        }
+        Ok(CastCommand {
             name: String::from(CAST),
             description: String::from("Cast a spell."),
             spell_name: String::from(sentence[1]),
@@ -116,7 +123,7 @@ impl CastCommand {
                 0..=2 => None,
                 _ => Some(String::from(sentence[2]))
             }
-        }
+        })
     }
 }
 
@@ -144,17 +151,20 @@ impl DefendCommand {
     /// use retribution::ret_lang::DefendCommand;
     ///
     /// let sentence = vec!["defend", "ally"];
-    /// let defend = DefendCommand::new(sentence);
+    /// let defend = DefendCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     /// assert_eq!(defend.name, "defend");
     /// assert_eq!(defend.description, "Defend an ally in a fight.");
     /// assert_eq!(defend.target, "ally");
     /// ```
-    pub fn new(sentence: Vec<&str>) -> DefendCommand {
-        DefendCommand {
+    pub fn build(sentence: Vec<&str>) -> Result<DefendCommand, &str> {
+        if sentence.len() < 2 {
+            return Err("Not enough arguments for cast command.");
+        }
+        Ok(DefendCommand {
             name: String::from(sentence[0]),
             description: String::from("Defend an ally in a fight."),
             target: String::from(sentence[1])
-        }
+        })
     }
 }
 
@@ -184,7 +194,7 @@ impl DefyDangerCommand {
     /// use retribution::ret_lang::DefyDangerCommand;
     ///
     /// let sentence = vec!["defy", "wizard"];
-    /// let defy = DefyDangerCommand::new(sentence);
+    /// let defy = DefyDangerCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     ///
     /// assert_eq!(defy.name, "defy");
     /// assert_eq!(defy.description, "Defy danger using a stat.");
@@ -192,7 +202,7 @@ impl DefyDangerCommand {
     /// assert_eq!(defy.stat, "wisdom");
     ///
     /// let sentence = vec!["dodge"];
-    /// let dodge = DefyDangerCommand::new(sentence);
+    /// let dodge = DefyDangerCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     ///
     /// assert_eq!(dodge.name, "dodge");
     /// assert_eq!(dodge.description, "Defy danger using a stat.");
@@ -200,7 +210,7 @@ impl DefyDangerCommand {
     /// assert_eq!(dodge.stat, "dexterity");
     ///
     /// let sentence = vec!["dodge", "goblin"];
-    /// let dodge = DefyDangerCommand::new(sentence);
+    /// let dodge = DefyDangerCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     ///
     /// assert_eq!(dodge.name, "dodge");
     /// assert_eq!(dodge.description, "Defy danger using a stat.");
@@ -208,7 +218,7 @@ impl DefyDangerCommand {
     /// assert_eq!(dodge.stat, "dexterity");
     ///
     /// let sentence = vec!["charm", "goblin"];
-    /// let charm = DefyDangerCommand::new(sentence);
+    /// let charm = DefyDangerCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     ///
     /// assert_eq!(charm.name, "charm");
     /// assert_eq!(charm.description, "Defy danger using a stat.");
@@ -216,7 +226,7 @@ impl DefyDangerCommand {
     /// assert_eq!(charm.stat, "charisma");
     ///
     /// let sentence = vec!["endure"];
-    /// let endure = DefyDangerCommand::new(sentence);
+    /// let endure = DefyDangerCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     ///
     /// assert_eq!(endure.name, "endure");
     /// assert_eq!(endure.description, "Defy danger using a stat.");
@@ -224,16 +234,19 @@ impl DefyDangerCommand {
     /// assert_eq!(endure.stat, "constitution");
     ///
     /// let sentence = vec!["improvise"];
-    /// let improvise = DefyDangerCommand::new(sentence);
+    /// let improvise = DefyDangerCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     ///
     /// assert_eq!(improvise.name, "improvise");
     /// assert_eq!(improvise.description, "Defy danger using a stat.");
     /// assert_eq!(improvise.target, None);
     /// assert_eq!(improvise.stat, "intelligence");
     /// ```
-    pub fn new(sentence: Vec<&str>) -> DefyDangerCommand {
+    pub fn build(sentence: Vec<&str>) -> Result<DefyDangerCommand, &str> {
+        if sentence.len() < 1 {
+            return Err("Not enough arguments for defy danger command.");
+        }
         let name = sentence[0];
-        DefyDangerCommand {
+        Ok(DefyDangerCommand {
             name: String::from(name),
             description: String::from("Defy danger using a stat."),
             target: match sentence.len() {
@@ -248,7 +261,7 @@ impl DefyDangerCommand {
                 IMPROVISE => String::from("intelligence"),
                 _ => String::from("dexterity") 
             }
-        }
+        })
     }
 }
 
@@ -276,17 +289,20 @@ impl DropCommand {
     /// use retribution::ret_lang::DropCommand;
     ///
     /// let sentence = vec!["drop", "sword"];
-    /// let drop = DropCommand::new(sentence);
+    /// let drop = DropCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     /// assert_eq!(drop.name, "drop");
     /// assert_eq!(drop.description, "Drops an item from the player's inventory.");
     /// assert_eq!(drop.target, "sword");
     /// ```
-    pub fn new(sentence: Vec<&str>) -> DropCommand {
-        DropCommand {
+    pub fn build(sentence: Vec<&str>) -> Result<DropCommand, &str> {
+        if sentence.len() < 2 {
+            return Err("Not enough arguments for drop command.");
+        }
+        Ok(DropCommand {
             name: String::from(DROP),
             description: String::from("Drops an item from the player's inventory."),
             target: String::from(sentence[1])
-        }
+        })
     }
 }
 
@@ -314,17 +330,20 @@ impl GoCommand {
     /// use retribution::ret_lang::GoCommand;
     ///
     /// let sentence = vec!["go", "north"];
-    /// let go = GoCommand::new(sentence);
+    /// let go = GoCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     /// assert_eq!(go.name, "go");
     /// assert_eq!(go.description, "Moves the player to a new location.");
     /// assert_eq!(go.target, "north");
     /// ```
-    pub fn new(sentence: Vec<&str>) -> GoCommand {
-        GoCommand {
+    pub fn build(sentence: Vec<&str>) -> Result<GoCommand, &str> {
+        if sentence.len() < 2 {
+            return Err("Not enough arguments for go command.");
+        }
+        Ok(GoCommand {
             name: String::from(GO),
             description: String::from("Moves the player to a new location."),
             target: String::from(sentence[1])
-        }
+        })
     }
 }
 
@@ -353,18 +372,21 @@ impl HackAndSlashCommand {
     /// use retribution::ret_lang::HackAndSlashCommand;
     ///
     /// let sentence = vec!["attack", "goblin"];
-    /// let hack = HackAndSlashCommand::new(sentence);
+    /// let hack = HackAndSlashCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     /// assert_eq!(hack.name, "attack");
     /// assert_eq!(hack.description, "Attack an enemy with a melee weapon.");
     /// assert_eq!(hack.target, vec!["goblin"]);
     /// ```
-    pub fn new(sentence: Vec<&str>) -> HackAndSlashCommand {
+    pub fn build(sentence: Vec<&str>) -> Result<HackAndSlashCommand, &str> {
+        if sentence.len() < 2 {
+            return Err("Not enough arguments for hack and slash command.");
+        }
         let name = *sentence.first().unwrap_or_else(|| panic!("No command found."));
-        HackAndSlashCommand {
+        Ok(HackAndSlashCommand {
             name: String::from(name),
             description: String::from("Attack an enemy with a melee weapon."),
             target: sentence[1..].iter().map(|s| String::from(*s)).collect()
-        }
+        })
     }
 }
 
@@ -392,7 +414,7 @@ impl HelpCommand {
     /// use retribution::ret_lang::HelpCommand;
     ///
     /// let sentence = vec!["help"];
-    /// let help = HelpCommand::new(sentence);
+    /// let help = HelpCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     /// assert_eq!(help.name, "help");
     /// assert_eq!(help.description, "Prints a list of commands or the description of a command.");
     /// assert_eq!(help.target, None);
@@ -402,17 +424,20 @@ impl HelpCommand {
     /// use retribution::ret_lang::HelpCommand;
     ///
     /// let sentence = vec!["help", "go"];
-    /// let help = HelpCommand::new(sentence);
+    /// let help = HelpCommand::build(sentence);
     /// ```
-    pub fn new(sentence: Vec<&str>) -> HelpCommand {
-        HelpCommand {
+    pub fn build(sentence: Vec<&str>) -> Result<HelpCommand, &str> {
+        if sentence.len() < 1 {
+            return Err("Not enough arguments for help command.");
+        }
+        Ok(HelpCommand {
             name: String::from(HELP),
             description: String::from("Prints a list of commands or the description of a command."),
             target: match sentence.len() {
                 1 => None,
                 _ => Some(String::from(sentence[1]))
             }
-        }
+        })
     }
 }
 
@@ -440,17 +465,64 @@ impl SayCommand {
     /// use retribution::ret_lang::SayCommand;
     ///
     /// let sentence = vec!["say", "hello", "world"];
-    /// let say = SayCommand::new(sentence);
+    /// let say = SayCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     /// assert_eq!(say.name, "say");
     /// assert_eq!(say.description, "Prints a message to the screen.");
     /// assert_eq!(say.target, "hello world");
     /// ```
-    pub fn new(sentence: Vec<&str>) -> SayCommand {
-        SayCommand {
+    pub fn build(sentence: Vec<&str>) -> Result<SayCommand, &str> {
+        if sentence.len() < 2 {
+            return Err("Not enough arguments for say command.");
+        }
+        Ok(SayCommand {
             name: String::from(SAY),
             description: String::from("Prints a message to the screen."),
             target: sentence[1..].join(" ")
+        })
+    }
+}
+
+/// A struct that holds the name, description, and target of a SpoutLoreCommand.
+///
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string that holds the description of the command.
+/// * `target` - An optional string that holds the target of the command.
+#[derive(Debug)]
+pub struct SpoutLoreCommand {
+    pub name: String,
+    pub description: String,
+    pub target: Option<String>
+}
+
+impl SpoutLoreCommand {
+    /// Construct new SpoutLoreCommand.
+    ///
+    /// # Arguments
+    /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::SpoutLoreCommand;
+    ///
+    /// let sentence = vec!["consult", "wizard"];
+    /// let spout = SpoutLoreCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
+    /// assert_eq!(spout.name, "consult");
+    /// assert_eq!(spout.description, "Spout lore about a subject.");
+    /// assert_eq!(spout.target, Some(String::from("wizard")));
+    /// ```
+    pub fn build(sentence: Vec<&str>) -> Result<SpoutLoreCommand, &str> {
+        if sentence.len() < 1 {
+            return Err("Not enough arguments for spout lore command.");
         }
+        Ok(SpoutLoreCommand {
+            name: String::from(sentence[0]),
+            description: String::from("Spout lore about a subject."),
+            target: match sentence.len() {
+                0..=1 => None,
+                _ => Some(String::from(sentence[1]))
+            }
+        })
     }
 }
 
@@ -478,17 +550,20 @@ impl TakeCommand {
     /// use retribution::ret_lang::TakeCommand;
     ///
     /// let sentence = vec!["take", "sword"];
-    /// let take = TakeCommand::new(sentence);
+    /// let take = TakeCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
     /// assert_eq!(take.name, "take");
     /// assert_eq!(take.description, "Takes an item from the current location.");
     /// assert_eq!(take.target, "sword");
     /// ```
-    pub fn new(sentence: Vec<&str>) -> TakeCommand {
-        TakeCommand {
+    pub fn build(sentence: Vec<&str>) -> Result<TakeCommand, &str> {
+        if sentence.len() < 2 {
+            return Err("Not enough arguments for take command.");
+        }
+        Ok(TakeCommand {
             name: String::from(TAKE),
             description: String::from("Takes an item from the current location."),
             target: String::from(sentence[1])
-        }
+        })
     }
 }
 
@@ -503,6 +578,7 @@ pub enum Command {
     Help(HelpCommand),
     Go(GoCommand),
     Say(SayCommand),
+    SpoutLore(SpoutLoreCommand),
     Take(TakeCommand),
 }
 
@@ -517,23 +593,55 @@ pub enum Command {
 /// let sentence = "say hello world";
 /// parse_input(sentence);
 /// ```
-/// # Panics
-/// Panics if the command is not found.
-pub fn parse_input(line: &str) -> Command {
+pub fn parse_input(line: &str) -> Result<Command, &str> {
     let tokens = tokenize(line);
     let command = tokens[0];
     match command {
-        AID | ASSIST => Command::Aid(AidCommand::new(tokens)),
-        ATTACK | FIGHT | HIT => Command::HackAndSlash(HackAndSlashCommand::new(tokens)),
-        CAST => Command::Cast(CastCommand::new(tokens)),
-        CHARM | DEFY | DODGE | ENDURE | IMPROVISE => Command::DefyDanger(DefyDangerCommand::new(tokens)),
-        DEFEND | PROTECT => Command::Defend(DefendCommand::new(tokens)),
-        DROP => Command::Drop(DropCommand::new(tokens)),
-        GO => Command::Go(GoCommand::new(tokens)),
-        HELP => Command::Help(HelpCommand::new(tokens)),
-        SAY => Command::Say(SayCommand::new(tokens)),
-        TAKE => Command::Take(TakeCommand::new(tokens)),
-        _ => panic!("Command not found."),
+        AID | ASSIST => {
+            let command = AidCommand::build(tokens)?;
+            Ok(Command::Aid(command))
+        },
+        ATTACK | FIGHT | HIT => {
+            let command = HackAndSlashCommand::build(tokens)?;
+            Ok(Command::HackAndSlash(command))
+        },
+        CAST => {
+            let command = CastCommand::build(tokens)?;
+            Ok(Command::Cast(command))
+        },
+        CONSULT => {
+            let command = SpoutLoreCommand::build(tokens)?;
+            Ok(Command::SpoutLore(command))
+        },
+        CHARM | DEFY | DODGE | ENDURE | IMPROVISE => {
+            let command = DefyDangerCommand::build(tokens)?;
+            Ok(Command::DefyDanger(command))
+        },
+        DEFEND | PROTECT => {
+            let command = DefendCommand::build(tokens)?;
+            Ok(Command::Defend(command))
+        },
+        DROP => {
+            let command = DropCommand::build(tokens)?;
+            Ok(Command::Drop(command))
+        },
+        GO => {
+            let command = GoCommand::build(tokens)?;
+            Ok(Command::Go(command))
+        },
+        HELP => {
+            let command = HelpCommand::build(tokens)?;
+            Ok(Command::Help(command))
+        },
+        SAY => {
+            let command = SayCommand::build(tokens)?;
+            Ok(Command::Say(command))
+        },
+        TAKE => {
+            let command = TakeCommand::build(tokens)?;
+            Ok(Command::Take(command))
+        },
+        _ => Err("Command not found."),
     }
 }
 
@@ -553,7 +661,7 @@ mod tests {
     #[test]
     fn test_parse_aid() {
         let sentence = "aid ally";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::Aid(aid) => {
                 assert_eq!(aid.name, "aid");
@@ -568,7 +676,7 @@ mod tests {
     #[test]
     fn test_parse_attack() {
         let sentence = "attack goblin";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::HackAndSlash(hack) => {
                 assert_eq!(hack.name, "attack");
@@ -583,7 +691,7 @@ mod tests {
     #[test]
     fn test_parse_hack_and_slash() {
         let sentence = "fight goblin";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::HackAndSlash(hack) => {
                 assert_eq!(hack.name, "fight");
@@ -598,7 +706,7 @@ mod tests {
     #[test]
     fn test_parse_cast() {
         let sentence = "cast fireball goblin";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::Cast(cast) => {
                 assert_eq!(cast.name, "cast");
@@ -614,7 +722,7 @@ mod tests {
     #[test]
     fn test_parse_defend() {
         let sentence = "protect ally";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::Defend(defend) => {
                 assert_eq!(defend.name, "protect");
@@ -629,7 +737,7 @@ mod tests {
     #[test]
     fn test_parse_defy_danger() {
         let sentence = "dodge";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::DefyDanger(defy) => {
                 assert_eq!(defy.name, "dodge");
@@ -645,7 +753,7 @@ mod tests {
     #[test]
     fn test_parse_drop() {
         let sentence = "drop sword";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::Drop(drop) => {
                 assert_eq!(drop.name, "drop");
@@ -660,7 +768,7 @@ mod tests {
     #[test]
     fn test_parse_go() {
         let sentence = "go north";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::Go(go) => {
                 assert_eq!(go.name, "go");
@@ -675,7 +783,7 @@ mod tests {
     #[test]
     fn test_parse_help() {
         let sentence = "help";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::Help(help) => {
                 assert_eq!(help.name, "help");
@@ -690,7 +798,7 @@ mod tests {
     #[test]
     fn test_parse_help_target() {
         let sentence = "help go";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::Help(help) => {
                 assert_eq!(help.name, "help");
@@ -705,7 +813,7 @@ mod tests {
     #[test]
     fn test_parse_say() {
         let sentence = "say hello world";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::Say(say) => {
                 assert_eq!(say.name, "say");
@@ -720,7 +828,7 @@ mod tests {
     #[test]
     fn test_parse_take() {
         let sentence = "take sword";
-        let comamnd = parse_input(sentence);
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
         match comamnd {
             Command::Take(take) => {
                 assert_eq!(take.name, "take");
