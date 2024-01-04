@@ -607,6 +607,48 @@ impl TakeCommand {
     }
 }
 
+
+/// A struct that holds the name, description, and target of a ParleyCommand.
+///
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string taht holds the description of the command.
+/// * `target` - A string that holds the target of the command.
+#[derive(Debug)]
+pub struct ParleyCommand {
+    pub name: String,
+    pub description: String,
+    pub target: String
+}
+
+impl ParleyCommand {
+    /// Construct new ParleyCommand.
+    ///
+    /// # Arguments
+    /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::ParleyCommand;
+    ///
+    /// let sentence = vec!["parley", "goblin"];
+    /// let parley = ParleyCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
+    /// assert_eq!(parley.name, "parley");
+    /// assert_eq!(parley.description, "Parley with an enemy.");
+    /// assert_eq!(parley.target, "goblin");
+    /// ```
+    pub fn build(sentence: Vec<&str>) -> Result<ParleyCommand, &str> {
+        if sentence.len() < 2 {
+            return Err("Not enough arguments for parley command.");
+        }
+        Ok(ParleyCommand {
+            name: String::from(PARLEY),
+            description: String::from("Parley with an enemy."),
+            target: String::from(sentence[1])
+        })
+    }
+}
+
 /// An enum that holds all of the possible commands.
 pub enum Command {
     Aid(AidCommand),
@@ -618,6 +660,7 @@ pub enum Command {
     Help(HelpCommand),
     Go(GoCommand),
     Interfere(InterfereCommand),
+    Parley(ParleyCommand),
     Say(SayCommand),
     SpoutLore(SpoutLoreCommand),
     Take(TakeCommand),
@@ -677,6 +720,10 @@ pub fn parse_input(line: &str) -> Result<Command, &str> {
         INTERFERE => {
             let command = InterfereCommand::build(tokens)?;
             Ok(Command::Interfere(command))
+        },
+        PARLEY => {
+            let command = ParleyCommand::build(tokens)?;
+            Ok(Command::Parley(command))
         },
         SAY => {
             let command = SayCommand::build(tokens)?;
@@ -866,6 +913,21 @@ mod tests {
                 assert_eq!(interfere.target, "goblin");
             },
             _ => panic!("Interfere command expected."),
+        }
+    }
+
+    /// Test the parse_input function with a parley command.
+    #[test]
+    fn test_parse_parley() {
+        let sentence = "parley goblin";
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
+        match comamnd {
+            Command::Parley(parley) => {
+                assert_eq!(parley.name, "parley");
+                assert_eq!(parley.description, "Parley with an enemy.");
+                assert_eq!(parley.target, "goblin");
+            },
+            _ => panic!("Parley command expected."),
         }
     }
 
