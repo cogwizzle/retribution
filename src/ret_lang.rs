@@ -2,7 +2,6 @@
 //! This module should only contain information about the language itself,
 //! and not implementation details about the game.
 
-// TODO pick up continuing to implement the commands for DW.
 const AID: &str = "aid";
 const ASSIST: &str = "assist";
 const ATTACK: &str = "attack";
@@ -441,6 +440,47 @@ impl HelpCommand {
     }
 }
 
+/// A struct that holds the name, description and target of an InterfereCommand.
+///
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string taht holds the description of the command.
+/// * `target` - A string that holds the target of the command.
+#[derive(Debug)]
+pub struct InterfereCommand {
+    pub name: String,
+    pub description: String,
+    pub target: String
+}
+
+impl InterfereCommand {
+    /// Construct new InterfereCommand.
+    ///
+    /// # Arguments
+    /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::InterfereCommand;
+    ///
+    /// let sentence = vec!["interfere", "goblin"];
+    /// let interfere = InterfereCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
+    /// assert_eq!(interfere.name, "interfere");
+    /// assert_eq!(interfere.description, "Interfere with an enemy's attack.");
+    /// assert_eq!(interfere.target, "goblin");
+    /// ```
+    pub fn build(sentence: Vec<&str>) -> Result<InterfereCommand, &str> {
+        if sentence.len() < 2 {
+            return Err("Not enough arguments for interfere command.");
+        }
+        Ok(InterfereCommand {
+            name: String::from(INTERFERE),
+            description: String::from("Interfere with an enemy's attack."),
+            target: String::from(sentence[1])
+        })
+    }
+}
+
 /// A struct that holds the name, description, and target of a SayCommand.
 ///
 /// # Attributes
@@ -577,6 +617,7 @@ pub enum Command {
     HackAndSlash(HackAndSlashCommand),
     Help(HelpCommand),
     Go(GoCommand),
+    Interfere(InterfereCommand),
     Say(SayCommand),
     SpoutLore(SpoutLoreCommand),
     Take(TakeCommand),
@@ -632,6 +673,10 @@ pub fn parse_input(line: &str) -> Result<Command, &str> {
         HELP => {
             let command = HelpCommand::build(tokens)?;
             Ok(Command::Help(command))
+        },
+        INTERFERE => {
+            let command = InterfereCommand::build(tokens)?;
+            Ok(Command::Interfere(command))
         },
         SAY => {
             let command = SayCommand::build(tokens)?;
@@ -806,6 +851,21 @@ mod tests {
                 assert_eq!(help.target, Some(String::from("go")));
             },
             _ => panic!("Help command expected."),
+        }
+    }
+
+    /// Test the parse_input function with an interfere command.
+    #[test]
+    fn test_parse_interfere() {
+        let sentence = "interfere goblin";
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
+        match comamnd {
+            Command::Interfere(interfere) => {
+                assert_eq!(interfere.name, "interfere");
+                assert_eq!(interfere.description, "Interfere with an enemy's attack.");
+                assert_eq!(interfere.target, "goblin");
+            },
+            _ => panic!("Interfere command expected."),
         }
     }
 
