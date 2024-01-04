@@ -264,6 +264,56 @@ impl DefyDangerCommand {
     }
 }
 
+/// A struct that holds the name, description, and target of a DiscernRealitiesCommand.
+///
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string taht holds the description of the command.
+/// * `target` - An optional string that holds the target of the command.
+#[derive(Debug)]
+pub struct DiscernRealitiesCommand {
+    pub name: String,
+    pub description: String,
+    pub target: Option<String>
+}
+
+impl DiscernRealitiesCommand {
+    /// Construct new DiscernRealitiesCommand.
+    ///
+    /// # Arguments
+    /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::DiscernRealitiesCommand;
+    ///
+    /// let sentence = vec!["search"];
+    /// let search = DiscernRealitiesCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
+    /// assert_eq!(search.name, "search");
+    /// assert_eq!(search.description, "Discern realities about a subject.");
+    /// assert_eq!(search.target, None);
+    ///
+    /// let sentence = vec!["study", "goblin"];
+    /// let search = DiscernRealitiesCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
+    /// assert_eq!(search.name, "study");
+    /// assert_eq!(search.description, "Discern realities about a subject.");
+    /// assert_eq!(search.target, Some(String::from("goblin")));
+    /// ```
+    pub fn build(sentence: Vec<&str>) -> Result<DiscernRealitiesCommand, &str> {
+        if sentence.len() < 1 {
+            return Err("Not enough arguments for discern realities command.");
+        }
+        Ok(DiscernRealitiesCommand {
+            name: String::from(sentence[0]),
+            description: String::from("Discern realities about a subject."),
+            target: match sentence.len() {
+                0..=1 => None,
+                _ => Some(String::from(sentence[1]))
+            }
+        })
+    }
+}
+
 /// A struct that holds the name, description, and target of a DropCommand.
 ///
 /// # Attributes
@@ -695,6 +745,7 @@ pub enum Command {
     Cast(CastCommand),
     Defend(DefendCommand),
     DefyDanger(DefyDangerCommand),
+    DiscernRealities(DiscernRealitiesCommand),
     Drop(DropCommand),
     HackAndSlash(HackAndSlashCommand),
     Help(HelpCommand),
@@ -769,6 +820,10 @@ pub fn parse_input(line: &str) -> Result<Command, &str> {
         SAY => {
             let command = SayCommand::build(tokens)?;
             Ok(Command::Say(command))
+        },
+        SEARCH | STUDY => {
+            let command = DiscernRealitiesCommand::build(tokens)?;
+            Ok(Command::DiscernRealities(command))
         },
         SHOOT | VOLLEY => {
             let command = VolleyCommand::build(tokens)?;
@@ -883,6 +938,21 @@ mod tests {
                 assert_eq!(defy.stat, "dexterity");
             },
             _ => panic!("Defy danger command expected."),
+        }
+    }
+
+    /// Test the parse_input function with a discern realities command.
+    #[test]
+    fn test_parse_discern_realities() {
+        let sentence = "search";
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
+        match comamnd {
+            Command::DiscernRealities(discern) => {
+                assert_eq!(discern.name, "search");
+                assert_eq!(discern.description, "Discern realities about a subject.");
+                assert_eq!(discern.target, None);
+            },
+            _ => panic!("Discern realities command expected."),
         }
     }
 
