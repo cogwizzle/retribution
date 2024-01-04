@@ -758,7 +758,7 @@ pub enum Command {
     Volley(VolleyCommand),
 }
 
-/// Parse a line of text and execute the command.
+/// Parse a line of text and return the command definition.
 /// # Arguments
 /// * `line` - A string slice that holds the line of text to parse.
 ///
