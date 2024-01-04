@@ -481,6 +481,47 @@ impl InterfereCommand {
     }
 }
 
+/// A struct that holds the name, description, and target of a ParleyCommand.
+///
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string taht holds the description of the command.
+/// * `target` - A string that holds the target of the command.
+#[derive(Debug)]
+pub struct ParleyCommand {
+    pub name: String,
+    pub description: String,
+    pub target: String
+}
+
+impl ParleyCommand {
+    /// Construct new ParleyCommand.
+    ///
+    /// # Arguments
+    /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::ParleyCommand;
+    ///
+    /// let sentence = vec!["parley", "goblin"];
+    /// let parley = ParleyCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
+    /// assert_eq!(parley.name, "parley");
+    /// assert_eq!(parley.description, "Parley with an enemy.");
+    /// assert_eq!(parley.target, "goblin");
+    /// ```
+    pub fn build(sentence: Vec<&str>) -> Result<ParleyCommand, &str> {
+        if sentence.len() < 2 {
+            return Err("Not enough arguments for parley command.");
+        }
+        Ok(ParleyCommand {
+            name: String::from(PARLEY),
+            description: String::from("Parley with an enemy."),
+            target: String::from(sentence[1])
+        })
+    }
+}
+
 /// A struct that holds the name, description, and target of a SayCommand.
 ///
 /// # Attributes
@@ -607,43 +648,42 @@ impl TakeCommand {
     }
 }
 
-
-/// A struct that holds the name, description, and target of a ParleyCommand.
+/// A struct that holds the name, description, and target of a VolleyCommand.
 ///
 /// # Attributes
 /// * `name` - A string that holds the name of the command.
 /// * `description` - A string taht holds the description of the command.
 /// * `target` - A string that holds the target of the command.
 #[derive(Debug)]
-pub struct ParleyCommand {
+pub struct VolleyCommand {
     pub name: String,
     pub description: String,
     pub target: String
 }
 
-impl ParleyCommand {
-    /// Construct new ParleyCommand.
+impl VolleyCommand {
+    /// Construct new VolleyCommand.
     ///
     /// # Arguments
     /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
-    ///
+    /// 
     /// # Examples
     /// ```
-    /// use retribution::ret_lang::ParleyCommand;
+    /// use retribution::ret_lang::VolleyCommand;
     ///
-    /// let sentence = vec!["parley", "goblin"];
-    /// let parley = ParleyCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
-    /// assert_eq!(parley.name, "parley");
-    /// assert_eq!(parley.description, "Parley with an enemy.");
-    /// assert_eq!(parley.target, "goblin");
+    /// let sentence = vec!["volley", "goblin"];
+    /// let volley = VolleyCommand::build(sentence).unwrap_or_else(|e| panic!("{}", e));
+    /// assert_eq!(volley.name, "volley");
+    /// assert_eq!(volley.description, "Attack an enemy with a ranged weapon.");
+    /// assert_eq!(volley.target, "goblin");
     /// ```
-    pub fn build(sentence: Vec<&str>) -> Result<ParleyCommand, &str> {
+    pub fn build(sentence: Vec<&str>) -> Result<VolleyCommand, &str> {
         if sentence.len() < 2 {
-            return Err("Not enough arguments for parley command.");
+            return Err("Not enough arguments for volley command.");
         }
-        Ok(ParleyCommand {
-            name: String::from(PARLEY),
-            description: String::from("Parley with an enemy."),
+        Ok(VolleyCommand {
+            name: String::from(sentence[0]),
+            description: String::from("Attack an enemy with a ranged weapon."),
             target: String::from(sentence[1])
         })
     }
@@ -664,6 +704,7 @@ pub enum Command {
     Say(SayCommand),
     SpoutLore(SpoutLoreCommand),
     Take(TakeCommand),
+    Volley(VolleyCommand),
 }
 
 /// Parse a line of text and execute the command.
@@ -728,6 +769,10 @@ pub fn parse_input(line: &str) -> Result<Command, &str> {
         SAY => {
             let command = SayCommand::build(tokens)?;
             Ok(Command::Say(command))
+        },
+        SHOOT | VOLLEY => {
+            let command = VolleyCommand::build(tokens)?;
+            Ok(Command::Volley(command))
         },
         TAKE => {
             let command = TakeCommand::build(tokens)?;
@@ -958,6 +1003,21 @@ mod tests {
                 assert_eq!(take.target, "sword");
             },
             _ => panic!("Take command expected."),
+        }
+    }
+
+    /// Test the parse_input function with a volley command.
+    #[test]
+    fn test_parse_volley() {
+        let sentence = "shoot goblin";
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
+        match comamnd {
+            Command::Volley(volley) => {
+                assert_eq!(volley.name, "shoot");
+                assert_eq!(volley.description, "Attack an enemy with a ranged weapon.");
+                assert_eq!(volley.target, "goblin");
+            },
+            _ => panic!("Volley command expected."),
         }
     }
 }
