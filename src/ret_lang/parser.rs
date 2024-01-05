@@ -1,3 +1,6 @@
+//! # Parser
+//! The parser module contains functions for parsing user input into commands.
+
 use crate::ret_lang::command::*;
 use super::*;
 
