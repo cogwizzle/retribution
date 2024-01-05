@@ -1,17 +1,34 @@
+//! # Command
+//!
+//! The command module contains all of the structs and enums that are used to parse the input from the user.
+
 use super::*;
 
-/// A struct that holds the name, description, and target of a AidCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - An optional string that holds the target of the command.
-#[derive(Debug)]
-pub struct AidCommand {
-    pub name: String,
-    pub description: String,
-    pub target: String
+macro_rules! create_command {
+    (
+        $(#[$doc:meta])*
+        $name:ident, $target:ty
+    ) => {
+        $(#[$doc])*
+        #[derive(Debug)]
+        pub struct $name {
+            pub name: String,
+            pub description: String,
+            pub target: $target
+        }
+    }
 }
+
+create_command!(
+    /// A struct that holds the name, description, and target of an AidCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - A string that holds the target of the command.
+    AidCommand,
+    String
+);
 
 impl AidCommand {
     /// Construct new AidCommand.
@@ -90,18 +107,16 @@ impl CastCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a DefendCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - A string that holds the target of the command.
-#[derive(Debug)]
-pub struct DefendCommand {
-    pub name: String,
-    pub description: String,
-    pub target: String
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a DefendCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - A string that holds the target of the command.
+    DefendCommand,
+    String
+);
 
 impl DefendCommand {
     /// Construct new DefendCommand.
@@ -228,18 +243,16 @@ impl DefyDangerCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a DiscernRealitiesCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - An optional string that holds the target of the command.
-#[derive(Debug)]
-pub struct DiscernRealitiesCommand {
-    pub name: String,
-    pub description: String,
-    pub target: Option<String>
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a DiscernRealitiesCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - An optional string that holds the target of the command.
+    DiscernRealitiesCommand,
+    Option<String>
+);
 
 impl DiscernRealitiesCommand {
     /// Construct new DiscernRealitiesCommand.
@@ -278,18 +291,16 @@ impl DiscernRealitiesCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a DropCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - A string that holds the target of the command.
-#[derive(Debug)]
-pub struct DropCommand {
-    pub name: String,
-    pub description: String,
-    pub target: String
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a DropCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - A string that holds the target of the command.
+    DropCommand,
+    String
+);
 
 impl DropCommand {
     /// Construct new DropCommand.
@@ -319,18 +330,16 @@ impl DropCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a GoCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - A string that holds the target of the command.
-#[derive(Debug)]
-pub struct GoCommand {
-    pub name: String,
-    pub description: String,
-    pub target: String
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a GoCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - A string that holds the target of the command.
+    GoCommand,
+    String
+);
 
 impl GoCommand {
     /// Construct new GoCommand.
@@ -360,19 +369,16 @@ impl GoCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a HackAndSlashCommand.
-/// 
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - An optional string that holds the target of the command.
-
-#[derive(Debug)]
-pub struct HackAndSlashCommand {
-    pub name: String,
-    pub description: String,
-    pub target: Vec<String>
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a HackAndSlashCommand.
+    /// 
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - An optional string that holds the target of the command.
+    HackAndSlashCommand,
+    Vec<String>
+);
 
 impl HackAndSlashCommand {
     /// Construct new HackAndSlashCommand.
@@ -403,18 +409,16 @@ impl HackAndSlashCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a HelpCommand.
-///     
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - An optional string that holds the target of the command.
-#[derive(Debug)]
-pub struct HelpCommand {
-    pub name: String,
-    pub description: String,
-    pub target: Option<String>
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a HelpCommand.
+    ///     
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - An optional string that holds the target of the command.
+    HelpCommand,
+    Option<String>
+);
 
 impl HelpCommand {
     /// Construct new HelpCommand.
@@ -454,18 +458,16 @@ impl HelpCommand {
     }
 }
 
-/// A struct that holds the name, description and target of an InterfereCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - A string that holds the target of the command.
-#[derive(Debug)]
-pub struct InterfereCommand {
-    pub name: String,
-    pub description: String,
-    pub target: String
-}
+create_command!(
+    /// A struct that holds the name, description and target of an InterfereCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - A string that holds the target of the command.
+    InterfereCommand,
+    String
+);
 
 impl InterfereCommand {
     /// Construct new InterfereCommand.
@@ -495,18 +497,16 @@ impl InterfereCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a ParleyCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - A string that holds the target of the command.
-#[derive(Debug)]
-pub struct ParleyCommand {
-    pub name: String,
-    pub description: String,
-    pub target: String
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a ParleyCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - A string that holds the target of the command.
+    ParleyCommand,
+    String
+);
 
 impl ParleyCommand {
     /// Construct new ParleyCommand.
@@ -536,18 +536,16 @@ impl ParleyCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a SayCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `value` - A string that holds the value of the command.
-#[derive(Debug)]
-pub struct SayCommand {
-    pub name: String,
-    pub description: String,
-    pub target: String
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a SayCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - A string that holds the value of the command.
+    SayCommand,
+    String
+);
 
 impl SayCommand {
     /// Construct new SayCommand.
@@ -577,18 +575,16 @@ impl SayCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a SpoutLoreCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - An optional string that holds the target of the command.
-#[derive(Debug)]
-pub struct SpoutLoreCommand {
-    pub name: String,
-    pub description: String,
-    pub target: Option<String>
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a SpoutLoreCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - An optional string that holds the target of the command.
+    SpoutLoreCommand,
+    Option<String>
+);
 
 impl SpoutLoreCommand {
     /// Construct new SpoutLoreCommand.
@@ -621,18 +617,16 @@ impl SpoutLoreCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a TakeCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - A string that holds the target of the command.
-#[derive(Debug)]
-pub struct TakeCommand {
-    pub name: String,
-    pub description: String,
-    pub target: String
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a TakeCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - A string that holds the target of the command.
+    TakeCommand,
+    String
+);
 
 impl TakeCommand {
     /// Construct new TakeCommand.
@@ -662,18 +656,16 @@ impl TakeCommand {
     }
 }
 
-/// A struct that holds the name, description, and target of a VolleyCommand.
-///
-/// # Attributes
-/// * `name` - A string that holds the name of the command.
-/// * `description` - A string that holds the description of the command.
-/// * `target` - A string that holds the target of the command.
-#[derive(Debug)]
-pub struct VolleyCommand {
-    pub name: String,
-    pub description: String,
-    pub target: String
-}
+create_command!(
+    /// A struct that holds the name, description, and target of a VolleyCommand.
+    ///
+    /// # Attributes
+    /// * `name` - A string that holds the name of the command.
+    /// * `description` - A string that holds the description of the command.
+    /// * `target` - A string that holds the target of the command.
+    VolleyCommand,
+    String
+);
 
 impl VolleyCommand {
     /// Construct new VolleyCommand.
