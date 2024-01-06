@@ -12,6 +12,7 @@ const DEFY: &str = "defy";
 const DODGE: &str = "dodge";
 const DROP: &str = "drop";
 const ENDURE: &str = "endure";
+const EXIT: &str = "exit";
 const FIGHT: &str = "fight";
 const GO: &str = "go";
 const HELP: &str = "help";

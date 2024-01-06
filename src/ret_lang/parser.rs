@@ -55,6 +55,10 @@ pub fn parse_input(line: &str) -> Result<Command, &str> {
             let command = DropCommand::build(tokens)?;
             Ok(Command::Drop(command))
         },
+        EXIT => {
+            let command = ExitCommand::build()?;
+            Ok(Command::Exit(command))
+        },
         GO => {
             let command = GoCommand::build(tokens)?;
             Ok(Command::Go(command))
@@ -222,6 +226,20 @@ mod tests {
                 assert_eq!(drop.target, "sword");
             },
             _ => panic!("Drop command expected."),
+        }
+    }
+
+    /// Test the parse_input function with an exit command.
+    #[test]
+    fn test_parse_exit() {
+        let sentence = "exit";
+        let comamnd = parse_input(sentence).unwrap_or_else(|e| panic!("{}", e));
+        match comamnd {
+            Command::Exit(exit) => {
+                assert_eq!(exit.name, "exit");
+                assert_eq!(exit.description, "Exits the game.");
+            },
+            _ => panic!("Exit command expected."),
         }
     }
 

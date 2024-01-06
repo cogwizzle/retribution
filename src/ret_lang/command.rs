@@ -330,6 +330,35 @@ impl DropCommand {
     }
 }
 
+/// A struct that holds the name, description, and target of an EndureHarmCommand.
+///
+/// # Attributes
+/// * `name` - A string that holds the name of the command.
+/// * `description` - A string that holds the description of the command.
+pub struct ExitCommand {
+    pub name: String,
+    pub description: String
+}
+
+impl ExitCommand {
+    /// Construct new ExitCommand.
+    ///
+    /// # Examples
+    /// ```
+    /// use retribution::ret_lang::ExitCommand;
+    ///
+    /// let exit = ExitCommand::build().unwrap_or_else(|e| panic!("{}", e));
+    /// assert_eq!(exit.name, "exit");
+    /// assert_eq!(exit.description, "Exits the game.");
+    /// ```
+    pub fn build<'a>() -> Result<ExitCommand, &'a str> {
+        Ok(ExitCommand {
+            name: String::from(EXIT),
+            description: String::from("Exits the game.")
+        })
+    }
+}
+
 create_command!(
     /// A struct that holds the name, description, and target of a GoCommand.
     ///
@@ -703,9 +732,10 @@ pub enum Command {
     DefyDanger(DefyDangerCommand),
     DiscernRealities(DiscernRealitiesCommand),
     Drop(DropCommand),
+    Exit(ExitCommand),
+    Go(GoCommand),
     HackAndSlash(HackAndSlashCommand),
     Help(HelpCommand),
-    Go(GoCommand),
     Interfere(InterfereCommand),
     Parley(ParleyCommand),
     Say(SayCommand),
