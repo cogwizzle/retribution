@@ -21,7 +21,7 @@ fn main() {
                 continue;
             }
         };
-        let output = interpreter::travel_parser(&command);
+        let output = interpreter::travel_interpreter(&command);
         match output {
             Ok(o) => println!("{}", o),
             Err(e) => println!("{}", e),
