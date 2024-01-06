@@ -1,19 +1,18 @@
 use retribution::game;
 use retribution::game::interpreter;
 use retribution::ret_lang;
+use std::io;
 
 fn main() {
     loop {
-        let input = match game::prompt() {
+        let mut reader = io::stdin();
+        let input = match game::prompt(&mut reader) {
             Ok(i) => i,
             Err(e) => {
                 println!("{}", e);
                 continue;
             }
         };
-        if input == "exit\n" {
-            break;
-        }
         let command = ret_lang::parse_input(&input[..]);
         let command = match command {
             Ok(c) => c,

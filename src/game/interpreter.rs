@@ -33,6 +33,9 @@ pub fn travel_parser<'a>(command: &'a ret_lang::Command) -> Result<String, &'a s
             let output = format!("Hero went {}", c.target);
             Ok(output)
         },
+        ret_lang::Command::Exit(_) => {
+            std::process::exit(0);
+        },
         _ => Err("Not able to do that action right now."),
     }
 }
