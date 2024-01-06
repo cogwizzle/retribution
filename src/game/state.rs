@@ -1,3 +1,6 @@
+//! # State
+//! This module contains the state of the game.
+
 /// A module that contains the state of the game.
 pub struct GameState {
     pub mode: Mode,
