@@ -6,10 +6,10 @@ use std::io;
 
 fn main() {
     let mut game_state = state::GameState::new();
+    let mut reader = io::stdin();
 
     // Main game loop.
     loop {
-        let mut reader = io::stdin();
         let input = match game::prompt(&mut reader) {
             Ok(i) => i,
             Err(e) => {
@@ -17,8 +17,7 @@ fn main() {
                 continue;
             }
         };
-        let command = ret_lang::parse_input(&input[..]);
-        let command = match command {
+        let command = match ret_lang::parse_input(&input[..]) {
             Ok(c) => c,
             _ => {
                 println!("{} is not a valid command.", input.trim());
