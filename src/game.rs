@@ -2,7 +2,7 @@ use std::io;
 
 pub mod interpreter;
 pub mod state;
-pub mod room;
+pub mod map;
 
 /// Prompt error message.
 const PROMPT_ERROR: &str = "Try command again.";

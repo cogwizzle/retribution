@@ -1,16 +1,19 @@
 //! # State
 //! This module contains the state of the game.
-use crate::game::room;
+use crate::game::map;
 
 /// A module that contains the state of the game.
-pub struct GameState<'a> {
+pub struct GameState {
     /// The current mode of the game.
     pub mode: Mode,
+    /// The current map the player is in.
+    pub map: Option<map::Map>,
     /// The current room the player is in.
-    pub room: Option<&'a room::Room>,
+    pub room: Option<(usize, usize)>,
+
 }
 
-impl<'a> GameState<'a> {
+impl GameState {
     /// A function that creates a new GameState.
     ///
     /// # Returns
@@ -22,16 +25,13 @@ impl<'a> GameState<'a> {
     ///
     /// let game_state = state::GameState::new();
     /// ```
-    pub fn new() -> GameState<'a> {
+    pub fn new() -> GameState {
         GameState {
             mode: Mode::Travel,
+            map: None,
             room: None,
         }
     }
-
-    // pub fn set_room(&mut self, room: &'a room::Room) {
-    //    self.room = Some(room);
-    // }
 }
 
 /// An enum that represents the mode of the game.
