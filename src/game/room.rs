@@ -116,3 +116,16 @@ impl Room {
         self.west = Box::new(Some(room));
     }
 }
+
+pub fn test_area() -> Room {
+    let mut room1 = Room::new(String::from("Room 1"), String::from("This is room 1."));
+    let room2 = Room::new(String::from("Room 2"), String::from("This is room 2."));
+    let room3 = Room::new(String::from("Room 3"), String::from("This is room 3."));
+    let room4 = Room::new(String::from("Room 4"), String::from("This is room 4."));
+    let room5 = Room::new(String::from("Room 5"), String::from("This is room 5."));
+    room1.set_north(room2);
+    room1.set_south(room3);
+    room1.set_east(room4);
+    room1.set_west(room5);
+    room1
+}
