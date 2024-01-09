@@ -1,11 +1,15 @@
 use retribution::game::interpreter;
+use retribution::game::map;
 use retribution::game::state;
 use retribution::game;
 use retribution::ret_lang;
 use std::io;
 
 fn main() {
+    let test_map = map::test_area();
     let mut game_state = state::GameState::new();
+    game_state.map = Some(test_map);
+    game_state.room = Some((1,1));
     let mut reader = io::stdin();
 
     // Main game loop.
