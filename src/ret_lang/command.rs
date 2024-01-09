@@ -1,9 +1,9 @@
 //! # Command
 //!
 //! The command module contains all of the structs and enums that are used to parse the input from the user.
-
 use super::*;
 
+/// Macro for creating a command.
 macro_rules! create_command {
     (
         $(#[$doc:meta])*
