@@ -70,8 +70,6 @@ impl Map {
         // We can safely assume these are positive numbers based on the check above.
         let x = x as usize;
         let y = y as usize;
-        println!("x: {}, y: {}", x, y);
-        println!("rooms.len(): {}, rooms[0].len(): {}", self.rooms.len(), self.rooms[0].len());
         if self.rooms.len() <= y || self.rooms[0].len() <= x {
             return None
         }
@@ -96,10 +94,20 @@ impl Map {
     /// use retribution::game::map;
     ///
     /// let room = map::Room::new(String::from("Test Room"), String::from("This is a test room."));
+    /// //Room formation:
+    /// //x [] x
+    /// //[][][]
+    /// //x [] x
     /// let mut map = map::Map::new(String::from("Test Area"), 3, 3);
     /// map.set_room(1, 1, room);
     /// let result = map.get_room(1, 1);
     /// assert!(result.is_some());
+    /// let result = map.get_room(0, 0);
+    /// assert!(result.is_none());
+    /// let result = map.get_room(-1, -1);
+    /// assert!(result.is_none());
+    /// let result = map.get_room(3, 3);
+    /// assert!(result.is_none());
     /// ```
     pub fn set_room(&mut self, x: usize, y: usize, room: Room) -> Result<(), &str> {
         if self.rooms.len() < x || self.rooms[x].len() < y {
