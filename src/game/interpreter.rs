@@ -18,7 +18,7 @@ fn travel_interpreter<'a>(command: &'a ret_lang::Command, state: &mut state::Gam
             };
 
             // A function that handles updating the room and returning the output.
-            let mut handle_room_change = |new_coords: (usize, usize)| {
+            let mut handle_room_change = |new_coords: (i32, i32)| {
                 let new_room = match state.map {
                     Some(ref m) => m.get_room(new_coords.0, new_coords.1),
                     None => return Err("Not able to do that action right now."),

@@ -9,7 +9,7 @@ pub struct GameState {
     /// The current map the player is in.
     pub map: Option<map::Map>,
     /// The current room the player is in.
-    pub room: Option<(usize, usize)>,
+    pub room: Option<(i32, i32)>,
 
 }
 

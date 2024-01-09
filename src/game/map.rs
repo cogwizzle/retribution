@@ -31,9 +31,9 @@ impl Map {
     pub fn new(name: String, x: i32, y: i32) -> Map {
         let mut rooms = vec![];
         // Create a grid of rooms.
-        for _ in 0..x {
+        for _ in 0..y {
             let mut row = vec![];
-            for _ in 0..y {
+            for _ in 0..x {
                 row.push(None);
             }
             rooms.push(row);
@@ -47,8 +47,8 @@ impl Map {
     /// A safe way to get a room from the map.
     ///
     /// # Arguments
-    /// * `x` - An usize that is the x coordinate of the room.
-    /// * `y` - An usize that is the y coordinate of the room.
+    /// * `x` - An i32 that is the x coordinate of the room.
+    /// * `y` - An i32 that is the y coordinate of the room.
     ///
     /// # Returns
     /// * `Option<Room>` - An option that is the room at the given coordinates, or None.
@@ -63,8 +63,16 @@ impl Map {
     /// let result = map.get_room(1, 1);
     /// assert!(result.is_some());
     /// ```
-    pub fn get_room(&self, x: usize, y: usize) -> Option<&Room> {
-        if self.rooms.len() < x || self.rooms[x].len() < y {
+    pub fn get_room(&self, x: i32, y: i32) -> Option<&Room> {
+        if x < 0 || y < 0 {
+            return None
+        }
+        // We can safely assume these are positive numbers based on the check above.
+        let x = x as usize;
+        let y = y as usize;
+        println!("x: {}, y: {}", x, y);
+        println!("rooms.len(): {}, rooms[0].len(): {}", self.rooms.len(), self.rooms[0].len());
+        if self.rooms.len() <= y || self.rooms[0].len() <= x {
             return None
         }
         let room = &self.rooms[x][y];
