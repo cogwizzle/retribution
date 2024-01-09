@@ -1,3 +1,5 @@
+//! # Interpreter
+//! A module that contains the interpreter for the game.
 use crate::ret_lang;
 use crate::game::state;
 
