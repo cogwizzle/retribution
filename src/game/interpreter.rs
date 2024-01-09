@@ -16,66 +16,38 @@ fn travel_interpreter<'a>(command: &'a ret_lang::Command, state: &mut state::Gam
                 Some(r) => r,
                 None => return Err("Not able to do that action right now."),
             };
+
+            // A function that handles updating the room and returning the output.
+            let mut handle_room_change = |new_coords: (usize, usize)| {
+                let new_room = match state.map {
+                    Some(ref m) => m.get_room(new_coords.0, new_coords.1),
+                    None => return Err("Not able to do that action right now."),
+                };
+                let new_room = match new_room {
+                    Some(r) => {
+                        state.room = Some(new_coords);
+                        r
+                    },
+                    None => return Err("Not able to do that action right now."),
+                };
+                Ok(format!("Hero went {}. {}", c.target, new_room.description))
+            };
             match c.target.to_lowercase().as_str() {
                 "north" => {
                     let new_coords = (x, y - 1);
-                    let new_room = match state.map {
-                        Some(ref m) => m.get_room(new_coords.0, new_coords.1),
-                        None => return Err("Not able to do that action right now."),
-                    };
-                    let new_room = match new_room {
-                        Some(r) => {
-                            state.room = Some(new_coords);
-                            r
-                        },
-                        None => return Err("Not able to do that action right now."),
-                    };
-                    return Ok(format!("Hero went {}. {}", c.target, new_room.description));
+                    handle_room_change(new_coords)
                 },
                 "south" => {
                     let new_coords = (x, y + 1);
-                    let new_room = match state.map {
-                        Some(ref m) => m.get_room(new_coords.0, new_coords.1),
-                        None => return Err("Not able to do that action right now."),
-                    };
-                    let new_room = match new_room {
-                        Some(r) => {
-                            state.room = Some(new_coords);
-                            r
-                        },
-                        None => return Err("Not able to do that action right now."),
-                    };
-                    return Ok(format!("Hero went {}. {}", c.target, new_room.description))
+                    handle_room_change(new_coords)
                 },
                 "east" => {
                     let new_coords = (x + 1, y);
-                    let new_room = match state.map {
-                        Some(ref m) => m.get_room(new_coords.0, new_coords.1),
-                        None => return Err("Not able to do that action right now."),
-                    };
-                    let new_room = match new_room {
-                        Some(r) => {
-                            state.room = Some(new_coords);
-                            r
-                        },
-                        None => return Err("Not able to do that action right now."),
-                    };
-                    return Ok(format!("Hero went {}. {}", c.target, new_room.description));
+                    handle_room_change(new_coords)
                 },
                 "west" => {
                     let new_coords = (x - 1, y);
-                    let new_room = match state.map {
-                        Some(ref m) => m.get_room(new_coords.0, new_coords.1),
-                        None => return Err("Not able to do that action right now."),
-                    };
-                    let new_room = match new_room {
-                        Some(r) => {
-                            state.room = Some(new_coords);
-                            r
-                        },
-                        None => return Err("Not able to do that action right now."),
-                    };
-                    return Ok(format!("Hero went {}. {}", c.target, new_room.description));
+                    handle_room_change(new_coords)
                 },
                 _ => return Err("Not able to do that action right now."),
             }
