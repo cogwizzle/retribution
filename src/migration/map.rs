@@ -116,15 +116,13 @@ mod tests {
 
     #[test]
     fn test_up() {
-        let migration = CreateMapMigration::new(String::from(":memory:"));
-        let result = migration.up();
+        let result = migrate_up(Some(String::from(":memory:")));
         assert_eq!(result, Ok(()));
     }
 
     #[test]
     fn test_down() {
-        let migration = CreateMapMigration::new(String::from(":memory:"));
-        let result = migration.down();
+        let result = migrate_down(Some(String::from(":memory:")));
         assert_eq!(result, Ok(()));
     }
 }
