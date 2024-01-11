@@ -238,6 +238,7 @@ pub fn migrate_down(path: Option<String>) -> Result<(), &'static str> {
 mod tests {
     use super::*;
 
+    /// Test the migrate_up function.
     #[test]
     fn create_map_migration_new() {
         let migration = CreateMapMigration::new(":memory:");
@@ -245,6 +246,7 @@ mod tests {
         assert_eq!(migration.path, ":memory:");
     }
 
+    /// Test the migrate_up function.
     #[test]
     fn test_area_migration_new() {
         let migration = TestArea::new(":memory:");
