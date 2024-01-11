@@ -92,6 +92,7 @@ pub struct TestArea<'a> {
     path: &'a str,
 }
 
+// TODO comment and pick up here.
 fn test_area() -> Map {
     let room1 = Room::new(String::from("Room 1"), String::from("This is room 1."));
     let room2 = Room::new(String::from("Room 2"), String::from("This is room 2."));
@@ -109,6 +110,7 @@ fn test_area() -> Map {
 
 
 impl<'a> Migration<'a> for TestArea<'a> {
+    /// Constructor for the TestArea struct.
     fn new(path: &'a str) -> Self {
         TestArea {
             name: String::from("TestArea"),
@@ -116,6 +118,10 @@ impl<'a> Migration<'a> for TestArea<'a> {
         }
     }
 
+    /// Run the migration.
+    ///
+    /// # Returns
+    /// * `Result<(), &'static str>` - A result that is Ok if the migration was successful, or Err if not.
     fn up(&self) -> Result<(), &'static str> {
         let conn = match Connection::open(self.path) {
             Ok(c) => c,
@@ -139,6 +145,10 @@ impl<'a> Migration<'a> for TestArea<'a> {
         result
     }
 
+    /// Rollback the migration.
+    ///
+    /// # Returns
+    /// * `Result<(), &'static str>` - A result that is Ok if the migration was successful, or Err if not.
     fn down(&self) -> Result<(), &'static str> {
         let conn = match Connection::open(self.path) {
             Ok(c) => c,
@@ -212,14 +222,14 @@ pub fn migrate_down(path: Option<String>) -> Result<(), &'static str> {
         Some(p) => p,
         None => String::from(DB_PATH),
     };
-    let migration = CreateMapMigration::new(path.as_str());
     let handle_migration = |name| {
         move |e| {
             eprintln!("Migration Error ({}) {}", name, e);
         }
     };
-    migration.down().unwrap_or_else(handle_migration(migration.name));
     let migration = TestArea::new(path.as_str());
+    migration.down().unwrap_or_else(handle_migration(migration.name));
+    let migration = CreateMapMigration::new(path.as_str());
     migration.down().unwrap_or_else(handle_migration(migration.name));
     Ok(())
 }
