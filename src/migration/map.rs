@@ -132,7 +132,7 @@ impl<'a> Migration<'a> for TestArea<'a> {
             Err(_) => return Err("Unable to serialize map."),
         };
         let result = match conn.execute(
-            "INSERT INTO maps (name, grid) VALUES (?1, ?2)",
+            "INSERT OR IGNORE INTO maps (name, grid) VALUES (?1, ?2)",
             &["test_area", &map_json],
         ) {
             Ok(_) => Ok(()),
