@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 use serde_json;
 
 /// A struct that represents a map in the game world.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Map {
     /// The name of the map. Value must be unique.
     pub name: String,
@@ -122,7 +122,7 @@ impl Map {
 }
 
 /// A struct that represents a location in the game world.
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Room {
     /// The name of the room.
     pub name: String,
@@ -156,7 +156,7 @@ impl Room {
 
 /// A portal is a struct that teleports a player to another map at a set of coordinates.
 /// Portals are one way, and are not visible to the player.
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Portal {
     /// Name of the portal
     pub name: String,
@@ -236,7 +236,6 @@ pub fn load_map(map_name: &str, path: Option<String>) -> Result<Map, &str> {
         Ok(g) => g,
         Err(_) => return Err("Unable to get grid."),
     };
-    println!("{} : {}", name, grid);
     let grid: Vec<Vec<Option<GridSquare>>> = match serde_json::from_str(grid.as_str()) {
         Ok(g) => g,
         Err(e) => {
@@ -251,7 +250,7 @@ pub fn load_map(map_name: &str, path: Option<String>) -> Result<Map, &str> {
 }
 
 /// A grid square is a struct that represents a square on the map grid.
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum GridSquare {
     Room(Room),
     Portal(Portal),
