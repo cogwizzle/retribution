@@ -97,7 +97,7 @@ pub fn interpreter<'a>(command: &'a ret_lang::Command, state: &mut state::GameSt
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::game::map;
+    use crate::migration::map;
 
     /// Test the travel_interpreter function.
     #[test]
