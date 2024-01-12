@@ -1,3 +1,7 @@
+//! # Map Migration
+//!
+//! This module contains the migration for the map table in the database.
+
 use super::*;
 use serde_json;
 use crate::game::map::{Map, Room};
@@ -6,9 +10,9 @@ use rusqlite::Connection;
 /// A struct that represents a map in the game world.
 ///
 /// TODO eventually move this to another file.
-pub trait Migration<'a> {
+pub trait Migration {
     /// Constructor for the struct.
-    fn new(path: &'a str) -> Self;
+    fn new(path: String) -> Self;
     /// Run the migration.
     fn up(&self) -> Result<(), &'static str>;
     /// Rollback the migration.
@@ -16,12 +20,12 @@ pub trait Migration<'a> {
 }
 
 /// A struct that represents a migration to create the map table in the database.
-struct CreateMapMigration<'a> {
+struct CreateMapMigration {
     name: String,
-    path: &'a str,
+    path: String,
 }
 
-impl<'a> Migration<'a> for CreateMapMigration<'a> {
+impl Migration for CreateMapMigration {
     /// Constructor for the CreateMapMigration struct.
     ///
     /// # Arguments
@@ -29,7 +33,8 @@ impl<'a> Migration<'a> for CreateMapMigration<'a> {
     ///
     /// # Returns
     /// * `CreateMapMigration` - A new CreateMapMigration.
-    fn new(path: &'a str) -> Self {
+    fn new(path: String) -> Self {
+        let path = path.replace("~", std::env::var("HOME").unwrap().as_str());
         CreateMapMigration {
             name: String::from("CreateMapMigration"),
             path,
@@ -41,11 +46,12 @@ impl<'a> Migration<'a> for CreateMapMigration<'a> {
     /// # Returns
     /// * `Result<(), &'static str>` - A result that is Ok if the table was created, or Err if not.
     fn up(&self) -> Result<(), &'static str> {
-        let conn = match Connection::open(self.path) {
+        let db = match Connection::open(self.path.as_str()) {
             Ok(c) => c,
             Err(_) => return Err("Unable to open database."),
         };
-        let result = match conn.execute(
+        println!("Creating table.");
+        let result = match db.execute(
             "CREATE TABLE IF NOT EXISTS maps (
                 name TEXT PRIMARY KEY,
                 grid BLOB NOT NULL
@@ -55,7 +61,7 @@ impl<'a> Migration<'a> for CreateMapMigration<'a> {
             Ok(_) => Ok(()),
             Err(_) => Err("Unable to create table."),
         };
-        match conn.close() {
+        match db.close() {
             Ok(_) => (),
             Err(_) => return Err("Unable to close database."),
         };
@@ -67,18 +73,18 @@ impl<'a> Migration<'a> for CreateMapMigration<'a> {
     /// # Returns
     /// * `Result<(), &'static str>` - A result that is Ok if the table was dropped, or Err if not.
     fn down(&self) -> Result<(), &'static str> {
-        let conn = match Connection::open(self.path) {
+        let db = match Connection::open(self.path.as_str()) {
             Ok(c) => c,
             Err(_) => return Err("Unable to open database."),
         };
-        let result = match conn.execute(
+        let result = match db.execute(
             "DROP TABLE IF EXISTS maps",
             []
         ) {
             Ok(_) => Ok(()),
             Err(_) => Err("Unable to drop table."),
         };
-        match conn.close() {
+        match db.close() {
             Ok(_) => (),
             Err(_) => return Err("Unable to close database."),
         };
@@ -86,13 +92,7 @@ impl<'a> Migration<'a> for CreateMapMigration<'a> {
     }
 }
 
-/// Struct for creating a test area map.
-pub struct TestArea<'a> {
-    name: String,
-    path: &'a str,
-}
-
-// TODO comment and pick up here.
+/// A function that creates a test area map.
 fn test_area() -> Map {
     let room1 = Room::new(String::from("Room 1"), String::from("This is room 1."));
     let room2 = Room::new(String::from("Room 2"), String::from("This is room 2."));
@@ -108,10 +108,16 @@ fn test_area() -> Map {
     map
 }
 
+/// Struct for creating a test area map.
+pub struct TestArea {
+    name: String,
+    path: String,
+}
 
-impl<'a> Migration<'a> for TestArea<'a> {
+impl Migration for TestArea {
     /// Constructor for the TestArea struct.
-    fn new(path: &'a str) -> Self {
+    fn new(path: String) -> Self {
+        let path = path.replace("~", std::env::var("HOME").unwrap().as_str());
         TestArea {
             name: String::from("TestArea"),
             path,
@@ -123,22 +129,22 @@ impl<'a> Migration<'a> for TestArea<'a> {
     /// # Returns
     /// * `Result<(), &'static str>` - A result that is Ok if the migration was successful, or Err if not.
     fn up(&self) -> Result<(), &'static str> {
-        let conn = match Connection::open(self.path) {
+        let db = match Connection::open(self.path.as_str()) {
             Ok(c) => c,
             Err(_) => return Err("Unable to open database."),
         };
-        let map_json = match serde_json::to_string(&test_area()) {
+        let map_json = match serde_json::to_string(&test_area().grid) {
             Ok(j) => j,
             Err(_) => return Err("Unable to serialize map."),
         };
-        let result = match conn.execute(
+        let result = match db.execute(
             "INSERT OR IGNORE INTO maps (name, grid) VALUES (?1, ?2)",
             &["test_area", &map_json],
         ) {
             Ok(_) => Ok(()),
             Err(_) => Err("Unable to insert map."),
         };
-        match conn.close() {
+        match db.close() {
             Ok(_) => (),
             Err(_) => return Err("Unable to close database."),
         };
@@ -150,25 +156,37 @@ impl<'a> Migration<'a> for TestArea<'a> {
     /// # Returns
     /// * `Result<(), &'static str>` - A result that is Ok if the migration was successful, or Err if not.
     fn down(&self) -> Result<(), &'static str> {
-        let conn = match Connection::open(self.path) {
+        let db = match Connection::open(self.path.as_str()) {
             Ok(c) => c,
             Err(_) => return Err("Unable to open database."),
         };
-        let result = match conn.execute(
+        let result = match db.execute(
             "DELETE FROM maps WHERE name = ?1",
             &["test_area"],
         ) {
             Ok(_) => Ok(()),
             Err(_) => Err("Unable to delete map."),
         };
-        match conn.close() {
+        match db.close() {
             Ok(_) => (),
             Err(_) => return Err("Unable to close database."),
         };
         result
     }
 }
-    
+
+/// A function that handles migration errors.
+///
+/// # Arguments
+/// * `name` - A string that is the name of the migration.
+/// * `e` - A string that is the error message.
+///
+/// # Returns
+/// * `Result<(), &'static str>` - A result that is Err.
+fn handle_migration_error(name: String, e: &str) -> Result<(), &'static str> {
+    eprintln!("Migration Error ({}) {}", name, e);
+    Err("Migration Error")
+}
 
 /// A function that runs the migration to create all map related content.
 ///
@@ -177,28 +195,21 @@ impl<'a> Migration<'a> for TestArea<'a> {
 ///
 /// # Returns
 /// * `Result<(), &str>` - A result that is Ok, or an error message.
-///
-/// # Examples
-/// ```
-/// use retribution::migration::map;
-///
-/// let result = map::migrate_up(Some(String::from(":memory:")));
-/// assert_eq!(result, Ok(()));
-/// ```
 pub fn migrate_up(path: Option<String>) -> Result<(), &'static str> {
     let path = match path {
         Some(p) => p,
         None => String::from(DB_PATH),
     };
-    let migration = CreateMapMigration::new(path.as_str());
-    let handle_migration = |name| {
-        move |e| {
-            eprintln!("Migration Error ({}) {}", name, e);
-        }
+    let migration = CreateMapMigration::new(path);
+    match migration.up() {
+        Ok(_) => (),
+        Err(e) => return handle_migration_error(migration.name, e),
     };
-    migration.up().unwrap_or_else(handle_migration(migration.name));
-    let migration = TestArea::new(path.as_str());
-    migration.up().unwrap_or_else(handle_migration(migration.name));
+    let migration = TestArea::new(migration.path);
+    match migration.up() {
+        Ok(_) => (),
+        Err(e) => return handle_migration_error(migration.name, e),
+    };
     Ok(())
 }
 
@@ -209,28 +220,21 @@ pub fn migrate_up(path: Option<String>) -> Result<(), &'static str> {
 ///
 /// # Returns
 /// * `Result<(), &str>` - A result that is Ok, or an error message.
-///
-/// # Examples
-/// ```
-/// use retribution::migration::map;
-///
-/// let result = map::migrate_down(Some(String::from(":memory:")));
-/// assert_eq!(result, Ok(()));
-/// ```
 pub fn migrate_down(path: Option<String>) -> Result<(), &'static str> {
     let path = match path {
         Some(p) => p,
         None => String::from(DB_PATH),
     };
-    let handle_migration = |name| {
-        move |e| {
-            eprintln!("Migration Error ({}) {}", name, e);
-        }
+    let migration = TestArea::new(path);
+    match migration.down() {
+        Ok(_) => (),
+        Err(e) => return handle_migration_error(migration.name, e),
     };
-    let migration = TestArea::new(path.as_str());
-    migration.down().unwrap_or_else(handle_migration(migration.name));
-    let migration = CreateMapMigration::new(path.as_str());
-    migration.down().unwrap_or_else(handle_migration(migration.name));
+    let migration = CreateMapMigration::new(migration.path);
+    match migration.down() {
+        Ok(_) => (),
+        Err(e) => return handle_migration_error(migration.name, e),
+    };
     Ok(())
 }
 
@@ -241,7 +245,7 @@ mod tests {
     /// Test the migrate_up function.
     #[test]
     fn create_map_migration_new() {
-        let migration = CreateMapMigration::new(":memory:");
+        let migration = CreateMapMigration::new(String::from(":memory:"));
         assert_eq!(migration.name, "CreateMapMigration");
         assert_eq!(migration.path, ":memory:");
     }
@@ -249,9 +253,16 @@ mod tests {
     /// Test the migrate_up function.
     #[test]
     fn test_area_migration_new() {
-        let migration = TestArea::new(":memory:");
+        let migration = TestArea::new(String::from(":memory:"));
         assert_eq!(migration.name, "TestArea");
         assert_eq!(migration.path, ":memory:");
+    }
+
+    /// Test handle_migration_error function.
+    #[test]
+    fn handle_migration_error_test() {
+        let result = handle_migration_error(String::from("Test"), "Error");
+        assert_eq!(result, Err("Migration Error"));
     }
 }
 
