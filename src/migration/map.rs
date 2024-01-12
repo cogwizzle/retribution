@@ -93,7 +93,7 @@ impl Migration for CreateMapMigration {
 }
 
 /// A function that creates a test area map.
-fn test_area() -> Map {
+pub fn test_area() -> Map {
     let room1 = Room::new(String::from("Room 1"), String::from("This is room 1."));
     let room2 = Room::new(String::from("Room 2"), String::from("This is room 2."));
     let room3 = Room::new(String::from("Room 3"), String::from("This is room 3."));
