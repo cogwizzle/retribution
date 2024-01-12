@@ -1,13 +1,16 @@
 //! # Map
 //! Module that represents a location in the game world.
+use rusqlite::Connection;
+use serde::{Serialize, Deserialize};
+use serde_json;
 
 /// A struct that represents a map in the game world.
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Map {
     /// The name of the map. Value must be unique.
     pub name: String,
-    /// A grid of rooms in the game world.
-    grid: Vec<Vec<Option<Room>>>
+    /// A grid of rooms and portal in the game world.
+    pub grid: Vec<Vec<Option<Room>>>
 }
 
 impl Map {
@@ -29,18 +32,18 @@ impl Map {
     /// assert_eq!(map.name, "Test Area");
     /// ```
     pub fn new(name: String, x: i32, y: i32) -> Map {
-        let mut rooms = vec![];
+        let mut grid = vec![];
         // Create a grid of rooms.
         for _ in 0..y {
             let mut row = vec![];
             for _ in 0..x {
                 row.push(None);
             }
-            rooms.push(row);
+            grid.push(row);
         }
         Map {
             name,
-            grid: rooms
+            grid
         }
     }
 
@@ -119,7 +122,7 @@ impl Map {
 }
 
 /// A struct that represents a location in the game world.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct Room {
     /// The name of the room.
     pub name: String,
@@ -153,7 +156,7 @@ impl Room {
 
 /// A portal is a struct that teleports a player to another map at a set of coordinates.
 /// Portals are one way, and are not visible to the player.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct Portal {
     /// Name of the portal
     pub name: String,
@@ -192,6 +195,61 @@ impl Portal {
     }
 }
 
+/// A function that loads maps from the database.
+///
+/// # Arguments
+/// * `map_name` - A string that is the name of the map to load.
+///
+/// # Returns
+/// * `Result<Map, &str>` - A result that is Ok, or an error message.
+pub fn load_map(map_name: &str, path: Option<String>) -> Result<Map, &str> {
+    let path = match path {
+        Some(p) => p,
+        None => String::from(crate::DB_PATH),
+    };
+    let path = path.replace("~", std::env::var("HOME").unwrap().as_str());
+    let conn = match Connection::open(path.as_str()) {
+        Ok(c) => c,
+        Err(_) => return Err("Unable to open database."),
+    };
+    let mut stmt = match conn.prepare("SELECT name, grid FROM maps WHERE name = ?1") {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("{}", e);
+            return Err("Unable to prepare statement.")
+        },
+    };
+    let mut rows = match stmt.query(&[&map_name]) {
+        Ok(r) => r,
+        Err(_) => return Err("Unable to query database."),
+    };
+    let row = match rows.next() {
+        Ok(Some(r)) => r,
+        Ok(None) => return Err("No map found."),
+        Err(_) => return Err("Unable to get row."),
+    };
+    let name = match row.get(0) {
+        Ok(n) => n,
+        Err(_) => return Err("Unable to get name."),
+    };
+    let grid: String  = match row.get(1) {
+        Ok(g) => g,
+        Err(_) => return Err("Unable to get grid."),
+    };
+    println!("{} : {}", name, grid);
+    let grid: Vec<Vec<Option<Room>>> = match serde_json::from_str(grid.as_str()) {
+        Ok(g) => g,
+        Err(e) => {
+            eprintln!("{}", e);
+            return Err("Unable to deserialize grid.")
+        },
+    };
+    Ok(Map {
+        name,
+        grid,
+    })
+}
+
 /// A grid square is a struct that represents a square on the map grid.
 #[derive(Debug, PartialEq)]
 pub enum GridSquare {
@@ -216,21 +274,6 @@ macro_rules! portal {
     };
 }
 
-pub fn test_area() -> Map {
-    let room1 = Room::new(String::from("Room 1"), String::from("This is room 1."));
-    let room2 = Room::new(String::from("Room 2"), String::from("This is room 2."));
-    let room3 = Room::new(String::from("Room 3"), String::from("This is room 3."));
-    let room4 = Room::new(String::from("Room 4"), String::from("This is room 4."));
-    let room5 = Room::new(String::from("Room 5"), String::from("This is room 5."));
-    let mut map = Map::new(String::from("Test Area"), 3, 3);
-    map.set_room(1, 1, room1).unwrap();
-    map.set_room(1, 0, room2).unwrap();
-    map.set_room(1, 2, room3).unwrap();
-    map.set_room(0, 1, room4).unwrap();
-    map.set_room(2, 1, room5).unwrap();
-    map
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -247,5 +290,15 @@ mod tests {
     fn create_a_grid_portal() {
         let portal = portal!("Test Portal", "Test Area", (1, 1));
         assert_eq!(GridSquare::Portal(Portal::new(String::from("Test Portal"), String::from("Test Area"), (1, 1))), portal);
+    }
+
+    #[test]
+    fn load_map_test() {
+        // Create an in memory database.
+        crate::migration::map::migrate_up(Some(String::from("test.db"))).unwrap();
+        let map = load_map("test_area", Some(String::from("test.db"))).unwrap();
+        std::fs::remove_file("test.db").unwrap();
+        assert_eq!(map.name, "test_area");
+        assert_eq!(map.grid.len(), 3);
     }
 }
