@@ -109,7 +109,7 @@ impl Map {
     /// let room = map::GridSquare::Room(map::Room::new(String::from("Test Room"), String::from("This is a test room.")));
     /// let mut map = map::Map::new(String::from("Test Area"), 3, 3);
     /// map.set_grid_square(1, 1, room);
-    /// let result = map.get_room(1, 1);
+    /// let result = map.get_grid_square(1, 1);
     /// assert!(result.is_some());
     /// ```
     pub fn set_grid_square(&mut self, x: usize, y: usize, room: GridSquare) -> Result<(), &str> {
