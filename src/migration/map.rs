@@ -50,7 +50,6 @@ impl Migration for CreateMapMigration {
             Ok(c) => c,
             Err(_) => return Err("Unable to open database."),
         };
-        println!("Creating table.");
         let result = match db.execute(
             "CREATE TABLE IF NOT EXISTS maps (
                 name TEXT PRIMARY KEY,
