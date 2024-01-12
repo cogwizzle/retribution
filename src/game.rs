@@ -1,4 +1,5 @@
 use std::io;
+use crate::migration;
 
 pub mod interpreter;
 pub mod state;
@@ -43,6 +44,10 @@ pub fn prompt(reader: &mut dyn LineReader) -> Result<String, String> {
         Err(_) => return Err(String::from(PROMPT_ERROR)),
     };
     Ok(input)
+}
+
+pub fn init() -> Result<(), &'static str> {
+    migration::map::migrate_up(None)
 }
 
 #[cfg(test)]
