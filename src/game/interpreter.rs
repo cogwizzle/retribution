@@ -2,6 +2,7 @@
 //! A module that contains the interpreter for the game.
 use crate::ret_lang;
 use crate::game::state;
+use crate::game::map;
 
 /// A function that takes a command runs game logic based on it.
 /// 
@@ -22,17 +23,20 @@ fn travel_interpreter<'a>(command: &'a ret_lang::Command, state: &mut state::Gam
             // A function that handles updating the room and returning the output.
             let mut handle_room_change = |new_coords: (i32, i32)| {
                 let new_room = match state.map {
-                    Some(ref m) => m.get_room(new_coords.0, new_coords.1),
+                    Some(ref m) => m.get_grid_square(new_coords.0, new_coords.1),
                     None => return Err("Not able to do that action right now."),
                 };
-                let new_room = match new_room {
+                let new_grid_square = match new_room {
                     Some(r) => {
                         state.room = Some(new_coords);
                         r
                     },
                     None => return Err("Not able to do that action right now."),
                 };
-                Ok(format!("Hero went {}. {}", c.target, new_room.description))
+                match new_grid_square {
+                    map::GridSquare::Room(r) => Ok(format!("Hero went {}. {}", c.target, r.description)),
+                    _ => return Err("Not able to do that action right now."),
+                }
             };
             match c.target.to_lowercase().as_str() {
                 "north" => {

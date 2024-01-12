@@ -10,7 +10,7 @@ pub struct Map {
     /// The name of the map. Value must be unique.
     pub name: String,
     /// A grid of rooms and portal in the game world.
-    pub grid: Vec<Vec<Option<Room>>>
+    pub grid: Vec<Vec<Option<GridSquare>>>
 }
 
 impl Map {
@@ -60,23 +60,23 @@ impl Map {
     /// ```
     /// use retribution::game::map;
     ///
-    /// let room = map::Room::new(String::from("Test Room"), String::from("This is a test room."));
+    /// let room = map::GridSquare::Room(map::Room::new(String::from("Test Room"), String::from("This is a test room.")));
     /// //Room formation:
     /// //x [] x
     /// //[][][]
     /// //x [] x
     /// let mut map = map::Map::new(String::from("Test Area"), 3, 3);
-    /// map.set_room(1, 1, room);
-    /// let result = map.get_room(1, 1);
+    /// map.set_grid_square(1, 1, room);
+    /// let result = map.get_grid_square(1, 1);
     /// assert!(result.is_some());
-    /// let result = map.get_room(0, 0);
+    /// let result = map.get_grid_square(0, 0);
     /// assert!(result.is_none());
-    /// let result = map.get_room(-1, -1);
+    /// let result = map.get_grid_square(-1, -1);
     /// assert!(result.is_none());
-    /// let result = map.get_room(3, 3);
+    /// let result = map.get_grid_square(3, 3);
     /// assert!(result.is_none());
     /// ```
-    pub fn get_room(&self, x: i32, y: i32) -> Option<&Room> {
+    pub fn get_grid_square(&self, x: i32, y: i32) -> Option<&GridSquare> {
         if x < 0 || y < 0 {
             return None
         }
@@ -106,13 +106,13 @@ impl Map {
     /// ```
     /// use retribution::game::map;
     ///
-    /// let room = map::Room::new(String::from("Test Room"), String::from("This is a test room."));
+    /// let room = map::GridSquare::Room(map::Room::new(String::from("Test Room"), String::from("This is a test room.")));
     /// let mut map = map::Map::new(String::from("Test Area"), 3, 3);
-    /// map.set_room(1, 1, room);
+    /// map.set_grid_square(1, 1, room);
     /// let result = map.get_room(1, 1);
     /// assert!(result.is_some());
     /// ```
-    pub fn set_room(&mut self, x: usize, y: usize, room: Room) -> Result<(), &str> {
+    pub fn set_grid_square(&mut self, x: usize, y: usize, room: GridSquare) -> Result<(), &str> {
         if self.grid.len() < x || self.grid[x].len() < y {
             return Err("Index out of bounds.")
         }
@@ -237,7 +237,7 @@ pub fn load_map(map_name: &str, path: Option<String>) -> Result<Map, &str> {
         Err(_) => return Err("Unable to get grid."),
     };
     println!("{} : {}", name, grid);
-    let grid: Vec<Vec<Option<Room>>> = match serde_json::from_str(grid.as_str()) {
+    let grid: Vec<Vec<Option<GridSquare>>> = match serde_json::from_str(grid.as_str()) {
         Ok(g) => g,
         Err(e) => {
             eprintln!("{}", e);
@@ -251,7 +251,7 @@ pub fn load_map(map_name: &str, path: Option<String>) -> Result<Map, &str> {
 }
 
 /// A grid square is a struct that represents a square on the map grid.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub enum GridSquare {
     Room(Room),
     Portal(Portal),

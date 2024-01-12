@@ -4,7 +4,7 @@
 
 use super::*;
 use serde_json;
-use crate::game::map::{Map, Room};
+use crate::game::map::{ GridSquare, Map, Room };
 use rusqlite::Connection;
 
 /// A struct that represents a map in the game world.
@@ -94,17 +94,17 @@ impl Migration for CreateMapMigration {
 
 /// A function that creates a test area map.
 pub fn test_area() -> Map {
-    let room1 = Room::new(String::from("Room 1"), String::from("This is room 1."));
-    let room2 = Room::new(String::from("Room 2"), String::from("This is room 2."));
-    let room3 = Room::new(String::from("Room 3"), String::from("This is room 3."));
-    let room4 = Room::new(String::from("Room 4"), String::from("This is room 4."));
-    let room5 = Room::new(String::from("Room 5"), String::from("This is room 5."));
+    let room1 = GridSquare::Room(Room::new(String::from("Room 1"), String::from("This is room 1.")));
+    let room2 = GridSquare::Room(Room::new(String::from("Room 2"), String::from("This is room 2.")));
+    let room3 = GridSquare::Room(Room::new(String::from("Room 3"), String::from("This is room 3.")));
+    let room4 = GridSquare::Room(Room::new(String::from("Room 4"), String::from("This is room 4.")));
+    let room5 = GridSquare::Room(Room::new(String::from("Room 5"), String::from("This is room 5.")));
     let mut map = Map::new(String::from("Test Area"), 3, 3);
-    map.set_room(1, 1, room1).unwrap();
-    map.set_room(1, 0, room2).unwrap();
-    map.set_room(1, 2, room3).unwrap();
-    map.set_room(0, 1, room4).unwrap();
-    map.set_room(2, 1, room5).unwrap();
+    map.set_grid_square(1, 1, room1).unwrap();
+    map.set_grid_square(1, 0, room2).unwrap();
+    map.set_grid_square(1, 2, room3).unwrap();
+    map.set_grid_square(0, 1, room4).unwrap();
+    map.set_grid_square(2, 1, room5).unwrap();
     map
 }
 
