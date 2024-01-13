@@ -4,7 +4,7 @@
 
 use super::*;
 use serde_json;
-use crate::game::map::{ GridSquare, Map, Room };
+use crate::game::map::{ GridSquare, Map, Portal, Room };
 use rusqlite::Connection;
 
 /// A struct that represents a map in the game world.
@@ -92,18 +92,41 @@ impl Migration for CreateMapMigration {
 }
 
 /// A function that creates a test area map.
+///
+/// Room formation:
+/// ```text
+/// [  x  ] [ r 4 ] [  x  ]
+/// [ r 2 ] [ r 1 ] [ r 3 ]
+/// [  x  ] [  p  ] [  x  ]
+/// ```
 pub fn test_area() -> Map {
     let room1 = GridSquare::Room(Room::new(String::from("Room 1"), String::from("This is room 1.")));
     let room2 = GridSquare::Room(Room::new(String::from("Room 2"), String::from("This is room 2.")));
     let room3 = GridSquare::Room(Room::new(String::from("Room 3"), String::from("This is room 3.")));
     let room4 = GridSquare::Room(Room::new(String::from("Room 4"), String::from("This is room 4.")));
-    let room5 = GridSquare::Room(Room::new(String::from("Room 5"), String::from("This is room 5.")));
+    let portal = GridSquare::Portal(Portal::new(String::from("test_area_2_portal"), String::from("Test Area 2"), (1, 0)));
     let mut map = Map::new(String::from("Test Area"), 3, 3);
     map.set_grid_square(1, 1, room1).unwrap();
     map.set_grid_square(1, 0, room2).unwrap();
     map.set_grid_square(1, 2, room3).unwrap();
     map.set_grid_square(0, 1, room4).unwrap();
-    map.set_grid_square(2, 1, room5).unwrap();
+    map.set_grid_square(2, 1, portal).unwrap();
+    map
+}
+
+/// A function that creates a test area 2 map.
+///
+/// Room formation:
+/// ```text
+/// [  p  ] 
+/// [ r 1 ]
+/// ```
+pub fn test_area_2() -> Map {
+    let mut map = Map::new(String::from("Test Area 2"), 2, 1);
+    let room = GridSquare::Room(Room::new(String::from("Room 1"), String::from("This is in test area 2.")));
+    let portal = GridSquare::Portal(Portal::new(String::from("test_area_portal"), String::from("Test Area"), (1, 1)));
+    map.set_grid_square(1, 0, room).unwrap();
+    map.set_grid_square(0, 0, portal).unwrap();
     map
 }
 
@@ -132,22 +155,30 @@ impl Migration for TestArea {
             Ok(c) => c,
             Err(_) => return Err("Unable to open database."),
         };
+        let insert = | name: &str, map_json: String | {
+            return match db.execute(
+                "INSERT OR IGNORE INTO maps (name, grid) VALUES (?1, ?2)",
+                &[name, &map_json],
+            ) {
+                Ok(_) => Ok(()),
+                Err(_) => Err("Unable to insert map."),
+            };
+        };
         let map_json = match serde_json::to_string(&test_area().grid) {
             Ok(j) => j,
             Err(_) => return Err("Unable to serialize map."),
         };
-        let result = match db.execute(
-            "INSERT OR IGNORE INTO maps (name, grid) VALUES (?1, ?2)",
-            &["test_area", &map_json],
-        ) {
-            Ok(_) => Ok(()),
-            Err(_) => Err("Unable to insert map."),
+        let map_json_2 = match serde_json::to_string(&test_area_2().grid) {
+            Ok(j) => j,
+            Err(_) => return Err("Unable to serialize map."),
         };
+        insert("Test Area", map_json)?;
+        insert("Test Area 2", map_json_2)?;
         match db.close() {
             Ok(_) => (),
             Err(_) => return Err("Unable to close database."),
         };
-        result
+        Ok(())
     }
 
     /// Rollback the migration.
@@ -160,8 +191,8 @@ impl Migration for TestArea {
             Err(_) => return Err("Unable to open database."),
         };
         let result = match db.execute(
-            "DELETE FROM maps WHERE name = ?1",
-            &["test_area"],
+            "DELETE FROM maps WHERE name = ?1 or name = ?2",
+            &["Test Area", "Test Area 2"],
         ) {
             Ok(_) => Ok(()),
             Err(_) => Err("Unable to delete map."),

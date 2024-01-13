@@ -15,7 +15,7 @@ use crate::game::map;
 fn travel_interpreter<'a>(command: &'a ret_lang::Command, state: &mut state::GameState) -> Result<String, &'a str> {
     match command {
         ret_lang::Command::Go(c) => {
-            let (x, y) = match state.room {
+            let (row, col) = match state.room {
                 Some(r) => r,
                 None => return Err("Not able to do that action right now."),
             };
@@ -43,7 +43,7 @@ fn travel_interpreter<'a>(command: &'a ret_lang::Command, state: &mut state::Gam
                     map::GridSquare::Portal(p) => p
                 };
                 let new_coords = portal.location;
-                let new_map = match map::load_map(portal.name.as_str(), None) {
+                let new_map = match map::load_map(portal.target.as_str(), None) {
                     Ok(m) => m,
                     Err(_) => {
                         state.map = Some(original_map);
@@ -53,7 +53,7 @@ fn travel_interpreter<'a>(command: &'a ret_lang::Command, state: &mut state::Gam
                 };
                 state.map = Some(new_map);
                 state.room = Some(new_coords);
-                let room = match state.map {
+                let grid_square_option = match state.map {
                     Some(ref m) => m.get_grid_square(new_coords.0, new_coords.1),
                     None => {
                         state.map = Some(original_map);    
@@ -61,7 +61,7 @@ fn travel_interpreter<'a>(command: &'a ret_lang::Command, state: &mut state::Gam
                         return Err("Not able to do that action right now.")
                     },
                 };
-                let grid_square = match room {
+                let grid_square = match grid_square_option {
                     Some(r) => r,
                     None => {
                         state.map = Some(original_map);    
@@ -71,25 +71,27 @@ fn travel_interpreter<'a>(command: &'a ret_lang::Command, state: &mut state::Gam
                 };
                 let room = match grid_square {
                     map::GridSquare::Room(r) => r,
-                    _ => return Err("Not able to do that action right now."),
+                    _ => {
+                        return Err("Not able to do that action right now.")
+                    },
                 };
                 return Ok(format!("Hero went {}. {}", c.target, room.description));
             };
             match c.target.to_lowercase().as_str() {
                 "north" => {
-                    let new_coords = (x, y - 1);
+                    let new_coords = (row - 1, col);
                     handle_room_change(new_coords)
                 },
                 "south" => {
-                    let new_coords = (x, y + 1);
+                    let new_coords = (row + 1, col);
                     handle_room_change(new_coords)
                 },
                 "east" => {
-                    let new_coords = (x + 1, y);
+                    let new_coords = (row, col + 1);
                     handle_room_change(new_coords)
                 },
                 "west" => {
-                    let new_coords = (x - 1, y);
+                    let new_coords = (row, col - 1);
                     handle_room_change(new_coords)
                 },
                 _ => return Err("Not able to do that action right now."),

@@ -7,7 +7,7 @@ use std::io;
 
 fn main() {
     game::init().unwrap();
-    let test_map = map::load_map("test_area", None).unwrap();
+    let test_map = map::load_map("Test Area", None).unwrap();
     let mut game_state = state::GameState::new();
     game_state.map = Some(test_map);
     game_state.room = Some((1,1));
