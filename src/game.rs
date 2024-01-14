@@ -35,13 +35,13 @@ impl LineReader for io::Stdin {
 /// * `reader` - A mutable reference to a `io::Stdin`.
 ///
 /// # Returns
-/// * `Result<String, String>` - A string that is the user's input, or an error message.
-pub fn prompt(reader: &mut dyn LineReader) -> Result<String, String> {
+/// * `Result<String, &'a str>` - A string that is the user's input, or an error message.
+pub fn prompt<'a>(reader: &'a mut dyn LineReader) -> Result<String, &'a str> {
     println!("{}", HERO_PROMPT);
     let mut input = String::new();
     match reader.read_line(&mut input) {
         Ok(i) => i,
-        Err(_) => return Err(String::from(PROMPT_ERROR)),
+        Err(_) => return Err(PROMPT_ERROR),
     };
     Ok(input)
 }
