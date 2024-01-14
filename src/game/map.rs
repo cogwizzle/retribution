@@ -208,62 +208,17 @@ pub fn load_map(map_name: &str, path: Option<String>) -> Result<Map, &str> {
         None => String::from(crate::DB_PATH),
     };
     let path = path.replace("~", std::env::var("HOME").unwrap().as_str());
-    let conn = match Connection::open(path.as_str()) {
-        Ok(c) => c,
-        Err(_) => return Err("Unable to open database."),
-    };
-    let mut stmt = match conn.prepare("SELECT name, grid FROM maps WHERE name = ?1") {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("{}", e);
-            return Err("Unable to prepare statement.");
-        }
-    };
-    let mut rows = match stmt.query(&[&map_name]) {
-        Ok(r) => r,
-        Err(_) => return Err("Unable to query database."),
-    };
+    let conn = Connection::open(path.as_str()).map_err(|_| "Unable to open database.")?;
+    let mut stmt = conn.prepare("SELECT name, grid FROM maps WHERE name = ?1").map_err(|_| "Unable to prepare statement.")?;
+    let mut rows = stmt.query(&[&map_name]).map_err(|_| "Unable to query database.")?;
     let row = match rows.next() {
         Ok(Some(r)) => r,
-        Ok(None) => {
-            eprintln!("No map found. {}", map_name);
-            return Err("No map found.");
-        }
+        Ok(None) => return Err("No map found."),
         Err(_) => return Err("Unable to get row."),
     };
-    let name = match row.get(0) {
-        Ok(n) => n,
-        Err(_) => return Err("Unable to get name."),
-    };
-    let grid: String = match row.get(1) {
-        Ok(g) => g,
-        Err(_) => return Err("Unable to get grid."),
-    };
-    let grid: Vec<Vec<Option<GridSquare>>> = match serde_json::from_str(grid.as_str()) {
-        Ok(g) => g,
-        Err(e) => {
-            eprintln!("{}", e);
-            return Err("Unable to deserialize grid.");
-        }
-    };
-    println!("map:");
-    for row in grid.iter() {
-        for grid_square in row.iter() {
-            let gs = match grid_square {
-                Some(g) => g,
-                None => {
-                    print!(" None");
-                    continue;
-                },
-            };
-            match gs {
-                GridSquare::Room(r) => print!(" {:?}", r.name),
-                GridSquare::Portal(p) => print!(" {:?}", p.name),
-            };
-        }
-        println!();
-    }
-    println!();
+    let name = row.get(0).map_err(|_| "Unable to get name.")?;
+    let grid_string: String = row.get(1).map_err(|_| "Unable to get grid.")?;
+    let grid: Vec<Vec<Option<GridSquare>>> = serde_json::from_str(grid_string.as_str()).map_err(|_| "Unable to deserialize grid.")?;
     Ok(Map { name, grid })
 }
 
@@ -326,13 +281,13 @@ mod tests {
         );
     }
 
-    // #[test]
-    //  fn load_map_test() {
-    //      // Create an in memory database.
-    //      crate::migration::map::migrate_up(Some(String::from("test.db"))).unwrap();
-    //      let map = load_map("Test Area", Some(String::from("test.db"))).unwrap();
-    //      std::fs::remove_file("test.db").unwrap();
-    //      assert_eq!(map.name, "test_area");
-    //      assert_eq!(map.grid.len(), 3);
-    //  }
+    #[test]
+     fn load_map_test() {
+         // Create an in memory database.
+         crate::migration::map::migrate_up(Some(String::from("test.db"))).unwrap();
+         let map = load_map("Test Area", Some(String::from("test.db"))).unwrap();
+         std::fs::remove_file("test.db").unwrap();
+         assert_eq!(map.name, "Test Area");
+         assert_eq!(map.grid.len(), 3);
+     }
 }
