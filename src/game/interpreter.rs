@@ -41,41 +41,28 @@ fn travel_interpreter<'a>(
                 let new_coords = portal.location;
                 let new_map =
                     map::load_map(portal.target.as_str(), None).map_err(|_| NOT_ABLE_MESSAGE)?;
-                state.map = Some(new_map);
-                state.room = Some(new_coords);
-                let grid_square = state
-                    .map
-                    .as_ref()
-                    .and_then(|m| m.get_grid_square(new_coords.0, new_coords.1))
+                let grid_square = new_map
+                    .get_grid_square(new_coords.0, new_coords.1)
                     .ok_or(NOT_ABLE_MESSAGE)?;
                 let room = match grid_square {
                     map::GridSquare::Room(r) => r,
                     _ => return Err(NOT_ABLE_MESSAGE),
                 };
+                state.map = Some(new_map.clone());
+                state.room = Some(new_coords);
                 return Ok(format!(
                     "Hero went {}. {}",
                     command.target, room.description
                 ));
             };
-            match command.target.to_lowercase().as_str() {
-                "north" => {
-                    let new_coords = (row - 1, col);
-                    handle_room_change(new_coords)
-                }
-                "south" => {
-                    let new_coords = (row + 1, col);
-                    handle_room_change(new_coords)
-                }
-                "east" => {
-                    let new_coords = (row, col + 1);
-                    handle_room_change(new_coords)
-                }
-                "west" => {
-                    let new_coords = (row, col - 1);
-                    handle_room_change(new_coords)
-                }
+            let new_coords = match command.target.to_lowercase().as_str() {
+                "north" => (row - 1, col),
+                "south" => (row + 1, col),
+                "east" => (row, col + 1),
+                "west" => (row, col - 1),
                 _ => return Err(NOT_ABLE_MESSAGE),
-            }
+            };
+            handle_room_change(new_coords)
         }
         ret_lang::Command::Exit(_) => {
             std::process::exit(0);
