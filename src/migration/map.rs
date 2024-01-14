@@ -7,18 +7,6 @@ use serde_json;
 use crate::game::map::{ GridSquare, Map, Portal, Room };
 use rusqlite::Connection;
 
-/// A struct that represents a map in the game world.
-///
-/// TODO eventually move this to another file.
-pub trait Migration {
-    /// Constructor for the struct.
-    fn new(path: String) -> Self;
-    /// Run the migration.
-    fn up(&self) -> Result<(), &'static str>;
-    /// Rollback the migration.
-    fn down(&self) -> Result<(), &'static str>;
-}
-
 /// A struct that represents a migration to create the map table in the database.
 struct CreateMapMigration {
     name: String,
