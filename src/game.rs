@@ -39,10 +39,7 @@ impl LineReader for io::Stdin {
 pub fn prompt<'a>(reader: &'a mut dyn LineReader) -> Result<String, &'a str> {
     println!("{}", HERO_PROMPT);
     let mut input = String::new();
-    match reader.read_line(&mut input) {
-        Ok(i) => i,
-        Err(_) => return Err(PROMPT_ERROR),
-    };
+    reader.read_line(&mut input).map_err(|_| PROMPT_ERROR)?;
     Ok(input)
 }
 
@@ -80,5 +77,21 @@ mod tests {
         };
         let input = prompt(&mut reader).unwrap_or_else(|e| panic!("{}", e));
         assert_eq!(input, "go north\n");
+    }
+
+    struct ErrMockReader {}
+
+    impl LineReader for ErrMockReader {
+        fn read_line(&mut self, _buf: &mut String) -> Result<usize, io::Error> {
+            Err(io::Error::new(io::ErrorKind::Other, "Mock Error"))
+        }
+    }
+
+    /// Test the prompt function with an error.
+    #[test]
+    fn prompt_error_test() {
+        let mut reader = ErrMockReader {};
+        let input = prompt(&mut reader);
+        assert_eq!(input, Err(PROMPT_ERROR));
     }
 }
