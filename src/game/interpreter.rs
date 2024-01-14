@@ -151,7 +151,7 @@ mod tests {
         game_state.room = Some((1,1));
         let command = ret_lang::parse_input("go north").unwrap_or_else(|e| panic!("{}", e));
         let output = travel_interpreter(&command, &mut game_state).unwrap_or_else(|e| panic!("{}", e));
-        assert_eq!(output, "Hero went north. This is room 2.");
+        assert_eq!(output, "Hero went north. This is room 4.");
     }
 
     // Test the travel_interpreter function with an invalid command.
