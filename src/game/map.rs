@@ -9,7 +9,7 @@ use serde_json;
 pub struct Map {
     /// The name of the map. Value must be unique.
     pub name: String,
-    /// A grid of rooms and portal in the game world.
+    /// A grid of rooms and portals in the game world.
     pub grid: Vec<Vec<Option<GridSquare>>>,
 }
 
