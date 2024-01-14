@@ -8,7 +8,7 @@ pub struct GameState {
     pub mode: Mode,
     /// The current map the player is in.
     pub map: Option<map::Map>,
-    /// The current room the player is in.
+    /// The current room the player is in. row, col
     pub room: Option<(i32, i32)>,
 
 }

@@ -6,7 +6,8 @@ use retribution::ret_lang;
 use std::io;
 
 fn main() {
-    let test_map = map::test_area();
+    game::init().unwrap();
+    let test_map = map::load_map("Test Area", None).unwrap();
     let mut game_state = state::GameState::new();
     game_state.map = Some(test_map);
     game_state.room = Some((1,1));
