@@ -46,7 +46,12 @@ pub fn prompt(reader: &mut dyn LineReader) -> Result<String, String> {
     Ok(input)
 }
 
+/// Function to run before the game initializes.
+///
+/// # Returns
+/// * `Result<(), &'static str>` - A result that is either Ok or Err.
 pub fn init() -> Result<(), &'static str> {
+    // Set up the database.
     migration::map::migrate_up(None)
 }
 
