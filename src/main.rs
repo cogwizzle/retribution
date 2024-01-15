@@ -31,13 +31,13 @@ fn main() {
                 continue;
             }
         };
-        // We don't care if the state writer fails as the game will continue
-        // to function as normal.
-        let _ = state_writer.write_state(game_state.clone()).map_err(|_| ());
         let output = interpreter::interpreter(&command, &mut game_state);
         match output {
             Ok(o) => println!("{}", o),
             Err(e) => println!("{}", e),
         }
+        // We don't care if the state writer fails as the game will continue
+        // to function as normal.
+        let _ = state_writer.write_state(game_state.clone()).map_err(|_| ());
     }
 }
