@@ -3,6 +3,8 @@
 //! This module contains the migration for the map table in the database.
 
 use super::*;
+use crate::room;
+use crate::portal;
 use crate::game::map::{GridSquare, Map, Portal, Room};
 use rusqlite::Connection;
 use serde_json;
@@ -69,27 +71,11 @@ impl Migration for CreateMapMigration {
 /// [  x  ] [  p  ] [  x  ]
 /// ```
 pub fn test_area() -> Map {
-    let room1 = GridSquare::Room(Room::new(
-        String::from("Room 1"),
-        String::from("This is room 1."),
-    ));
-    let room2 = GridSquare::Room(Room::new(
-        String::from("Room 2"),
-        String::from("This is room 2."),
-    ));
-    let room3 = GridSquare::Room(Room::new(
-        String::from("Room 3"),
-        String::from("This is room 3."),
-    ));
-    let room4 = GridSquare::Room(Room::new(
-        String::from("Room 4"),
-        String::from("This is room 4."),
-    ));
-    let portal = GridSquare::Portal(Portal::new(
-        String::from("test_area_2_portal"),
-        String::from("Test Area 2"),
-        (1, 0),
-    ));
+    let room1 = room!("Room 1", "This is room 1.");
+    let room2 = room!("Room 2", "This is room 2.");
+    let room3 = room!("Room 3", "This is room 3.");
+    let room4 = room!("Room 4", "This is room 4.");
+    let portal = portal!("Test Area 2", "Test Area 2", (1, 0));
     let mut map = Map::new(String::from("Test Area"), 3, 3);
     map.set_grid_square(1, 1, room1).unwrap();
     map.set_grid_square(1, 0, room2).unwrap();
@@ -108,15 +94,8 @@ pub fn test_area() -> Map {
 /// ```
 pub fn test_area_2() -> Map {
     let mut map = Map::new(String::from("Test Area 2"), 2, 1);
-    let room = GridSquare::Room(Room::new(
-        String::from("Room 1"),
-        String::from("This is in test area 2."),
-    ));
-    let portal = GridSquare::Portal(Portal::new(
-        String::from("test_area_portal"),
-        String::from("Test Area"),
-        (1, 1),
-    ));
+    let room = room!("Room 1 - Test Area 2", "This is in test area 2.");
+    let portal = portal!("Test Area", "Test Area", (1, 1));
     map.set_grid_square(1, 0, room).unwrap();
     map.set_grid_square(0, 0, portal).unwrap();
     map
