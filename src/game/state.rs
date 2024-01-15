@@ -12,7 +12,6 @@ pub struct GameState {
     pub map: Option<map::Map>,
     /// The current room the player is in. row, col
     pub room: Option<(i32, i32)>,
-
 }
 
 impl GameState {

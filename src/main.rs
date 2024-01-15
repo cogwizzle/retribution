@@ -1,7 +1,8 @@
+use retribution::game;
 use retribution::game::interpreter;
 use retribution::game::map;
 use retribution::game::state;
-use retribution::game;
+use retribution::plugin;
 use retribution::ret_lang;
 use std::io;
 
@@ -10,8 +11,9 @@ fn main() {
     let test_map = map::load_map("Test Area", None).unwrap();
     let mut game_state = state::GameState::new();
     game_state.map = Some(test_map);
-    game_state.room = Some((1,1));
+    game_state.room = Some((1, 1));
     let mut reader = io::stdin();
+    let state_writer = plugin::StateWriter::new(None);
 
     // Main game loop.
     loop {
@@ -29,6 +31,9 @@ fn main() {
                 continue;
             }
         };
+        // We don't care if the state writer fails as the game will continue
+        // to function as normal.
+        let _ = state_writer.write_state(&game_state);
         let output = interpreter::interpreter(&command, &mut game_state);
         match output {
             Ok(o) => println!("{}", o),
