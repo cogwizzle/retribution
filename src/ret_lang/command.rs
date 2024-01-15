@@ -54,7 +54,7 @@ impl AidCommand {
         Ok(AidCommand {
             name: String::from(name),
             description: String::from("Aid an ally in a fight."),
-            target: String::from(sentence[1])
+            target: String::from(sentence[1]),
         })
     }
 }
@@ -71,7 +71,7 @@ pub struct CastCommand {
     pub name: String,
     pub description: String,
     pub spell_name: String,
-    pub target: Option<String>
+    pub target: Option<String>,
 }
 
 impl CastCommand {
@@ -101,8 +101,8 @@ impl CastCommand {
             spell_name: String::from(sentence[1]),
             target: match sentence.len() {
                 0..=2 => None,
-                _ => Some(String::from(sentence[2]))
-            }
+                _ => Some(String::from(sentence[2])),
+            },
         })
     }
 }
@@ -141,7 +141,7 @@ impl DefendCommand {
         Ok(DefendCommand {
             name: String::from(sentence[0]),
             description: String::from("Defend an ally in a fight."),
-            target: String::from(sentence[1])
+            target: String::from(sentence[1]),
         })
     }
 }
@@ -158,7 +158,7 @@ pub struct DefyDangerCommand {
     pub name: String,
     pub description: String,
     pub target: Option<String>,
-    pub stat: String
+    pub stat: String,
 }
 
 impl DefyDangerCommand {
@@ -229,7 +229,7 @@ impl DefyDangerCommand {
             description: String::from("Defy danger using a stat."),
             target: match sentence.len() {
                 1 => None,
-                _ => Some(String::from(sentence[1]))
+                _ => Some(String::from(sentence[1])),
             },
             stat: match name {
                 CHARM => String::from("charisma"),
@@ -237,8 +237,8 @@ impl DefyDangerCommand {
                 DODGE => String::from("dexterity"),
                 ENDURE => String::from("constitution"),
                 IMPROVISE => String::from("intelligence"),
-                _ => String::from("dexterity") 
-            }
+                _ => String::from("dexterity"),
+            },
         })
     }
 }
@@ -285,8 +285,8 @@ impl DiscernRealitiesCommand {
             description: String::from("Discern realities about a subject."),
             target: match sentence.len() {
                 0..=1 => None,
-                _ => Some(String::from(sentence[1]))
-            }
+                _ => Some(String::from(sentence[1])),
+            },
         })
     }
 }
@@ -325,7 +325,7 @@ impl DropCommand {
         Ok(DropCommand {
             name: String::from(DROP),
             description: String::from("Drops an item from the player's inventory."),
-            target: String::from(sentence[1])
+            target: String::from(sentence[1]),
         })
     }
 }
@@ -337,7 +337,7 @@ impl DropCommand {
 /// * `description` - A string that holds the description of the command.
 pub struct ExitCommand {
     pub name: String,
-    pub description: String
+    pub description: String,
 }
 
 impl ExitCommand {
@@ -354,7 +354,7 @@ impl ExitCommand {
     pub fn build<'a>() -> Result<ExitCommand, &'a str> {
         Ok(ExitCommand {
             name: String::from(EXIT),
-            description: String::from("Exits the game.")
+            description: String::from("Exits the game."),
         })
     }
 }
@@ -393,14 +393,14 @@ impl GoCommand {
         Ok(GoCommand {
             name: String::from(GO),
             description: String::from("Moves the player to a new location."),
-            target: String::from(sentence[1])
+            target: String::from(sentence[1]),
         })
     }
 }
 
 create_command!(
     /// A struct that holds the name, description, and target of a HackAndSlashCommand.
-    /// 
+    ///
     /// # Attributes
     /// * `name` - A string that holds the name of the command.
     /// * `description` - A string that holds the description of the command.
@@ -429,11 +429,13 @@ impl HackAndSlashCommand {
         if sentence.len() < 2 {
             return Err("Not enough arguments for hack and slash command.");
         }
-        let name = *sentence.first().unwrap_or_else(|| panic!("No command found."));
+        let name = *sentence
+            .first()
+            .unwrap_or_else(|| panic!("No command found."));
         Ok(HackAndSlashCommand {
             name: String::from(name),
             description: String::from("Attack an enemy with a melee weapon."),
-            target: sentence[1..].iter().map(|s| String::from(*s)).collect()
+            target: sentence[1..].iter().map(|s| String::from(*s)).collect(),
         })
     }
 }
@@ -481,8 +483,8 @@ impl HelpCommand {
             description: String::from("Prints a list of commands or the description of a command."),
             target: match sentence.len() {
                 1 => None,
-                _ => Some(String::from(sentence[1]))
-            }
+                _ => Some(String::from(sentence[1])),
+            },
         })
     }
 }
@@ -521,7 +523,7 @@ impl InterfereCommand {
         Ok(InterfereCommand {
             name: String::from(INTERFERE),
             description: String::from("Interfere with an enemy's attack."),
-            target: String::from(sentence[1])
+            target: String::from(sentence[1]),
         })
     }
 }
@@ -560,7 +562,7 @@ impl ParleyCommand {
         Ok(ParleyCommand {
             name: String::from(PARLEY),
             description: String::from("Parley with an enemy."),
-            target: String::from(sentence[1])
+            target: String::from(sentence[1]),
         })
     }
 }
@@ -599,7 +601,7 @@ impl SayCommand {
         Ok(SayCommand {
             name: String::from(SAY),
             description: String::from("Prints a message to the screen."),
-            target: sentence[1..].join(" ")
+            target: sentence[1..].join(" "),
         })
     }
 }
@@ -640,8 +642,8 @@ impl SpoutLoreCommand {
             description: String::from("Spout lore about a subject."),
             target: match sentence.len() {
                 0..=1 => None,
-                _ => Some(String::from(sentence[1]))
-            }
+                _ => Some(String::from(sentence[1])),
+            },
         })
     }
 }
@@ -680,7 +682,7 @@ impl TakeCommand {
         Ok(TakeCommand {
             name: String::from(TAKE),
             description: String::from("Takes an item from the current location."),
-            target: String::from(sentence[1])
+            target: String::from(sentence[1]),
         })
     }
 }
@@ -701,7 +703,7 @@ impl VolleyCommand {
     ///
     /// # Arguments
     /// * `sentence` - A vector of string slices that holds the line of text to tokenize.
-    /// 
+    ///
     /// # Examples
     /// ```
     /// use retribution::ret_lang::VolleyCommand;
@@ -719,7 +721,7 @@ impl VolleyCommand {
         Ok(VolleyCommand {
             name: String::from(sentence[0]),
             description: String::from("Attack an enemy with a ranged weapon."),
-            target: String::from(sentence[1])
+            target: String::from(sentence[1]),
         })
     }
 }

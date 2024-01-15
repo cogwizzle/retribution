@@ -3,9 +3,9 @@
 //! This module contains the migration for the map table in the database.
 
 use super::*;
-use crate::room;
-use crate::portal;
 use crate::game::map::{GridSquare, Map, Portal, Room};
+use crate::portal;
+use crate::room;
 use rusqlite::Connection;
 use serde_json;
 
@@ -167,7 +167,7 @@ impl Migration for TestArea {
 /// * `Result<(), &'static str>` - A result that is Err.
 fn handle_migration_error(name: String, e: &str) -> &'static str {
     eprintln!("Migration Error ({}) {}", name, e);
-    return "Migration Error"
+    return "Migration Error";
 }
 
 /// A function that runs the migration to create all map related content.
@@ -180,9 +180,13 @@ fn handle_migration_error(name: String, e: &str) -> &'static str {
 pub fn migrate_up(path: Option<String>) -> Result<(), &'static str> {
     let path = path.unwrap_or_else(|| String::from(DB_PATH));
     let migration = CreateMapMigration::new(path);
-    migration.up().map_err(|e| handle_migration_error(migration.name, e))?;
+    migration
+        .up()
+        .map_err(|e| handle_migration_error(migration.name, e))?;
     let migration = TestArea::new(migration.path);
-    migration.up().map_err(|e| handle_migration_error(migration.name, e))?;
+    migration
+        .up()
+        .map_err(|e| handle_migration_error(migration.name, e))?;
     Ok(())
 }
 
@@ -196,9 +200,13 @@ pub fn migrate_up(path: Option<String>) -> Result<(), &'static str> {
 pub fn migrate_down(path: Option<String>) -> Result<(), &'static str> {
     let path = path.unwrap_or_else(|| String::from(DB_PATH));
     let migration = TestArea::new(path);
-    migration.down().map_err(|e| handle_migration_error(migration.name, e))?;
+    migration
+        .down()
+        .map_err(|e| handle_migration_error(migration.name, e))?;
     let migration = CreateMapMigration::new(migration.path);
-    migration.down().map_err(|e| handle_migration_error(migration.name, e))?;
+    migration
+        .down()
+        .map_err(|e| handle_migration_error(migration.name, e))?;
     Ok(())
 }
 
