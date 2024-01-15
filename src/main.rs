@@ -14,12 +14,12 @@ fn main() {
     game_state.room = Some((1, 1));
     let mut reader = io::stdin();
     let state_writer = plugin::StateWriter::new(None);
-    // We don't care if the state writer fails as the game will continue
-    // to function as normal.
-    let _ = state_writer.write_state(game_state.clone()).map_err(|_| ());
 
     // Main game loop.
     loop {
+        // We don't care if the state writer fails as the game will continue
+        // to function as normal.
+        let _ = state_writer.write_state(game_state.clone()).map_err(|_| ());
         let input = match game::prompt(&mut reader) {
             Ok(i) => i,
             Err(e) => {
@@ -39,8 +39,5 @@ fn main() {
             Ok(o) => println!("{}", o),
             Err(e) => println!("{}", e),
         }
-        // We don't care if the state writer fails as the game will continue
-        // to function as normal.
-        let _ = state_writer.write_state(game_state.clone()).map_err(|_| ());
     }
 }
