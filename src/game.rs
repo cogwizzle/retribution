@@ -1,9 +1,9 @@
-use std::io;
 use crate::migration;
+use std::io;
 
 pub mod interpreter;
-pub mod state;
 pub mod map;
+pub mod state;
 
 /// Prompt error message.
 const PROMPT_ERROR: &str = "Try command again.";
