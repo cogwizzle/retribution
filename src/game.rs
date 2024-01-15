@@ -1,4 +1,4 @@
-use crate::migration;
+use crate::{migration, plugin::PLUGIN_OUTPUT};
 use std::io;
 
 pub mod interpreter;
@@ -50,6 +50,15 @@ pub fn prompt<'a>(reader: &'a mut dyn LineReader) -> Result<String, &'a str> {
 pub fn init() -> Result<(), &'static str> {
     // Set up the database.
     migration::map::migrate_up(None)
+}
+
+/// Function to run after the game ends.
+///
+/// # Returns
+/// * `Result<(), &'static str>` - A result that is either Ok or Err.
+pub fn tear_down() -> Result<(), &'static str> {
+    std::fs::remove_file(PLUGIN_OUTPUT).map_err(|_| "Failed to remove plugin file.")?;
+    Ok(())
 }
 
 #[cfg(test)]

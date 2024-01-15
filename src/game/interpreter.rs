@@ -4,6 +4,8 @@ use crate::game::map;
 use crate::game::state;
 use crate::ret_lang;
 
+use super::tear_down;
+
 const NOT_ABLE_MESSAGE: &str = "Not able to do that action right now.";
 
 /// A function that takes a command runs game logic based on it.
@@ -65,6 +67,7 @@ fn travel_interpreter<'a>(
             handle_room_change(new_coords)
         }
         ret_lang::Command::Exit(_) => {
+            let _ = tear_down();
             std::process::exit(0);
         }
         _ => Err(NOT_ABLE_MESSAGE),

@@ -8,7 +8,7 @@ use crate::game::state;
 /// The version of the plugin.
 const VERSION: &str = "0.1.0";
 /// The path to the plugin file.
-const PLUGIN_OUTPUT: &str = "~/ret-plugin.json";
+pub const PLUGIN_OUTPUT: &str = "~/ret-plugin.json";
 
 /// A struct that represents the output of the plugin.
 #[derive(Serialize, Deserialize)]
