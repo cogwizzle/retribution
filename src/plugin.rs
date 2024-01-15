@@ -1,10 +1,8 @@
 //! # Plugin
 //!
 //! Handles the plugin interface for the game.
-use std::borrow::Cow;
-
+use std::thread;
 use serde::{Deserialize, Serialize};
-
 use crate::game::state;
 
 /// The version of the plugin.
@@ -14,14 +12,14 @@ const PLUGIN_OUTPUT: &str = "~/ret-plugin.json";
 
 /// A struct that represents the output of the plugin.
 #[derive(Serialize, Deserialize)]
-struct PluginOutput<'a> {
+struct PluginOutput {
     /// The version of the plugin.
     pub version: String,
     /// The game state to write to the plugin file.
-    pub game_state: Cow<'a, state::GameState>,
+    pub game_state: state::GameState,
 }
 
-impl<'a> PluginOutput<'a> {
+impl PluginOutput {
     /// A function that creates a new PluginOutput.
     ///
     /// # Arguments
@@ -29,7 +27,7 @@ impl<'a> PluginOutput<'a> {
     ///
     /// # Returns
     /// * `PluginOutput` - A new PluginOutput.
-    pub fn new(game_state: Cow<'a, state::GameState>) -> PluginOutput<'a> {
+    pub fn new(game_state: state::GameState) -> PluginOutput {
         PluginOutput {
             version: VERSION.to_string(),
             game_state,
@@ -65,6 +63,7 @@ impl StateWriter {
             Some(p) => p,
             None => PLUGIN_OUTPUT.to_string(),
         };
+        let path = path.replace("~", std::env::var("HOME").unwrap().as_str());
         StateWriter { output_file: path }
     }
 
@@ -75,10 +74,16 @@ impl StateWriter {
     ///
     /// # Returns
     /// * `Result<(), String>` - The result of writing the state to the plugin file.
-    pub async fn write_state(&self, state: &state::GameState) -> Result<(), String> {
-        let plugin_output = PluginOutput::new(Cow::Borrowed(state));
-        let json = serde_json::to_string(&plugin_output).map_err(|e| e.to_string())?;
-        std::fs::write(self.output_file.as_str(), json).map_err(|e| e.to_string())?;
+    pub fn write_state(&self, state: state::GameState) -> Result<(), String> {
+        println!("write_state");
+        // spawn a thread to write the state to the plugin file.
+        let output_file = self.output_file.clone();
+        let state_clone = state.clone();
+        thread::spawn(move || {
+            let plugin_output = PluginOutput::new(state_clone);
+            let json = serde_json::to_string(&plugin_output).unwrap();
+            std::fs::write(output_file, json).unwrap();
+        }).join().map_err(|_| "Failed to write state to plugin file.".to_string())?;
         Ok(())
     }
 }
@@ -91,18 +96,16 @@ mod tests {
     fn state_writer_write_state_test() {
         let game_state = state::GameState::new();
         let state_writer = StateWriter::new(Some("test.json".to_string()));
-        let _ = async {
-            let results = state_writer.write_state(&game_state).await;
-            std::fs::remove_file("test.json").unwrap();
-            assert!(results.is_ok());
-        };
+        let results = state_writer.write_state(game_state);
+        std::fs::remove_file("test.json").unwrap();
+        assert!(results.is_ok());
     }
 
     /// Test the plugin output constructor.
     #[test]
     fn plugin_output_test() {
         let game_state = state::GameState::new();
-        let plugin_output = PluginOutput::new(Cow::Borrowed(&game_state));
+        let plugin_output = PluginOutput::new(game_state.clone());
         assert_eq!(plugin_output.version, VERSION);
     }
 }
