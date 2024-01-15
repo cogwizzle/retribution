@@ -3,9 +3,9 @@
 //! This module contains the migration for the map table in the database.
 
 use super::*;
-use serde_json;
-use crate::game::map::{ GridSquare, Map, Portal, Room };
+use crate::game::map::{GridSquare, Map, Portal, Room};
 use rusqlite::Connection;
+use serde_json;
 
 /// A struct that represents a migration to create the map table in the database.
 struct CreateMapMigration {
@@ -34,25 +34,17 @@ impl Migration for CreateMapMigration {
     /// # Returns
     /// * `Result<(), &'static str>` - A result that is Ok if the table was created, or Err if not.
     fn up(&self) -> Result<(), &'static str> {
-        let db = match Connection::open(self.path.as_str()) {
-            Ok(c) => c,
-            Err(_) => return Err("Unable to open database."),
-        };
-        let result = match db.execute(
+        let db = Connection::open(self.path.as_str()).map_err(|_| "Unable to open database.")?;
+        db.execute(
             "CREATE TABLE IF NOT EXISTS maps (
                 name TEXT PRIMARY KEY,
                 grid BLOB NOT NULL
             )",
-            []
-        ) {
-            Ok(_) => Ok(()),
-            Err(_) => Err("Unable to create table."),
-        };
-        match db.close() {
-            Ok(_) => (),
-            Err(_) => return Err("Unable to close database."),
-        };
-        result
+            [],
+        )
+        .map_err(|_| "Unable to create table.")?;
+        db.close().map_err(|_| "Unable to close database.")?;
+        Ok(())
     }
 
     /// Drop the map table in the database.
@@ -60,22 +52,11 @@ impl Migration for CreateMapMigration {
     /// # Returns
     /// * `Result<(), &'static str>` - A result that is Ok if the table was dropped, or Err if not.
     fn down(&self) -> Result<(), &'static str> {
-        let db = match Connection::open(self.path.as_str()) {
-            Ok(c) => c,
-            Err(_) => return Err("Unable to open database."),
-        };
-        let result = match db.execute(
-            "DROP TABLE IF EXISTS maps",
-            []
-        ) {
-            Ok(_) => Ok(()),
-            Err(_) => Err("Unable to drop table."),
-        };
-        match db.close() {
-            Ok(_) => (),
-            Err(_) => return Err("Unable to close database."),
-        };
-        result
+        let db = Connection::open(self.path.as_str()).map_err(|_| "Unable to open database.")?;
+        db.execute("DROP TABLE IF EXISTS maps", [])
+            .map_err(|_| "Unable to drop table.")?;
+        db.close().map_err(|_| "Unable to close database.")?;
+        Ok(())
     }
 }
 
@@ -88,11 +69,27 @@ impl Migration for CreateMapMigration {
 /// [  x  ] [  p  ] [  x  ]
 /// ```
 pub fn test_area() -> Map {
-    let room1 = GridSquare::Room(Room::new(String::from("Room 1"), String::from("This is room 1.")));
-    let room2 = GridSquare::Room(Room::new(String::from("Room 2"), String::from("This is room 2.")));
-    let room3 = GridSquare::Room(Room::new(String::from("Room 3"), String::from("This is room 3.")));
-    let room4 = GridSquare::Room(Room::new(String::from("Room 4"), String::from("This is room 4.")));
-    let portal = GridSquare::Portal(Portal::new(String::from("test_area_2_portal"), String::from("Test Area 2"), (1, 0)));
+    let room1 = GridSquare::Room(Room::new(
+        String::from("Room 1"),
+        String::from("This is room 1."),
+    ));
+    let room2 = GridSquare::Room(Room::new(
+        String::from("Room 2"),
+        String::from("This is room 2."),
+    ));
+    let room3 = GridSquare::Room(Room::new(
+        String::from("Room 3"),
+        String::from("This is room 3."),
+    ));
+    let room4 = GridSquare::Room(Room::new(
+        String::from("Room 4"),
+        String::from("This is room 4."),
+    ));
+    let portal = GridSquare::Portal(Portal::new(
+        String::from("test_area_2_portal"),
+        String::from("Test Area 2"),
+        (1, 0),
+    ));
     let mut map = Map::new(String::from("Test Area"), 3, 3);
     map.set_grid_square(1, 1, room1).unwrap();
     map.set_grid_square(1, 0, room2).unwrap();
@@ -106,13 +103,20 @@ pub fn test_area() -> Map {
 ///
 /// Room formation:
 /// ```text
-/// [  p  ] 
+/// [  p  ]
 /// [ r 1 ]
 /// ```
 pub fn test_area_2() -> Map {
     let mut map = Map::new(String::from("Test Area 2"), 2, 1);
-    let room = GridSquare::Room(Room::new(String::from("Room 1"), String::from("This is in test area 2.")));
-    let portal = GridSquare::Portal(Portal::new(String::from("test_area_portal"), String::from("Test Area"), (1, 1)));
+    let room = GridSquare::Room(Room::new(
+        String::from("Room 1"),
+        String::from("This is in test area 2."),
+    ));
+    let portal = GridSquare::Portal(Portal::new(
+        String::from("test_area_portal"),
+        String::from("Test Area"),
+        (1, 1),
+    ));
     map.set_grid_square(1, 0, room).unwrap();
     map.set_grid_square(0, 0, portal).unwrap();
     map
@@ -139,33 +143,22 @@ impl Migration for TestArea {
     /// # Returns
     /// * `Result<(), &'static str>` - A result that is Ok if the migration was successful, or Err if not.
     fn up(&self) -> Result<(), &'static str> {
-        let db = match Connection::open(self.path.as_str()) {
-            Ok(c) => c,
-            Err(_) => return Err("Unable to open database."),
-        };
-        let insert = | name: &str, map_json: String | {
-            return match db.execute(
+        let db = Connection::open(self.path.as_str()).map_err(|_| "Unable to open database.")?;
+        let insert = |name: &str, map_json: String| -> Result<(), &'static str> {
+            db.execute(
                 "INSERT OR IGNORE INTO maps (name, grid) VALUES (?1, ?2)",
                 &[name, &map_json],
-            ) {
-                Ok(_) => Ok(()),
-                Err(_) => Err("Unable to insert map."),
-            };
+            )
+            .map_err(|_| "Unable to insert map.")?;
+            Ok(())
         };
-        let map_json = match serde_json::to_string(&test_area().grid) {
-            Ok(j) => j,
-            Err(_) => return Err("Unable to serialize map."),
-        };
-        let map_json_2 = match serde_json::to_string(&test_area_2().grid) {
-            Ok(j) => j,
-            Err(_) => return Err("Unable to serialize map."),
-        };
+        let map_json =
+            serde_json::to_string(&test_area().grid).map_err(|_| "Unable to serialize map.")?;
+        let map_json_2 =
+            serde_json::to_string(&test_area_2().grid).map_err(|_| "Unable to serialize map.")?;
         insert("Test Area", map_json)?;
         insert("Test Area 2", map_json_2)?;
-        match db.close() {
-            Ok(_) => (),
-            Err(_) => return Err("Unable to close database."),
-        };
+        db.close().map_err(|_| "Unable to close database.")?;
         Ok(())
     }
 
@@ -174,22 +167,14 @@ impl Migration for TestArea {
     /// # Returns
     /// * `Result<(), &'static str>` - A result that is Ok if the migration was successful, or Err if not.
     fn down(&self) -> Result<(), &'static str> {
-        let db = match Connection::open(self.path.as_str()) {
-            Ok(c) => c,
-            Err(_) => return Err("Unable to open database."),
-        };
-        let result = match db.execute(
+        let db = Connection::open(self.path.as_str()).map_err(|_| "Unable to open database.")?;
+        db.execute(
             "DELETE FROM maps WHERE name = ?1 or name = ?2",
             &["Test Area", "Test Area 2"],
-        ) {
-            Ok(_) => Ok(()),
-            Err(_) => Err("Unable to delete map."),
-        };
-        match db.close() {
-            Ok(_) => (),
-            Err(_) => return Err("Unable to close database."),
-        };
-        result
+        )
+        .map_err(|_| "Unable to delete map.")?;
+        db.close().map_err(|_| "Unable to close database.")?;
+        Ok(())
     }
 }
 
@@ -201,9 +186,9 @@ impl Migration for TestArea {
 ///
 /// # Returns
 /// * `Result<(), &'static str>` - A result that is Err.
-fn handle_migration_error(name: String, e: &str) -> Result<(), &'static str> {
+fn handle_migration_error(name: String, e: &str) -> &'static str {
     eprintln!("Migration Error ({}) {}", name, e);
-    Err("Migration Error")
+    return "Migration Error"
 }
 
 /// A function that runs the migration to create all map related content.
@@ -212,22 +197,13 @@ fn handle_migration_error(name: String, e: &str) -> Result<(), &'static str> {
 /// * `path` - A string that is the path to the database.
 ///
 /// # Returns
-/// * `Result<(), &str>` - A result that is Ok, or an error message.
+/// * `Result<(), &'static str>` - A result that is Ok, or an error message.
 pub fn migrate_up(path: Option<String>) -> Result<(), &'static str> {
-    let path = match path {
-        Some(p) => p,
-        None => String::from(DB_PATH),
-    };
+    let path = path.unwrap_or_else(|| String::from(DB_PATH));
     let migration = CreateMapMigration::new(path);
-    match migration.up() {
-        Ok(_) => (),
-        Err(e) => return handle_migration_error(migration.name, e),
-    };
+    migration.up().map_err(|e| handle_migration_error(migration.name, e))?;
     let migration = TestArea::new(migration.path);
-    match migration.up() {
-        Ok(_) => (),
-        Err(e) => return handle_migration_error(migration.name, e),
-    };
+    migration.up().map_err(|e| handle_migration_error(migration.name, e))?;
     Ok(())
 }
 
@@ -239,20 +215,11 @@ pub fn migrate_up(path: Option<String>) -> Result<(), &'static str> {
 /// # Returns
 /// * `Result<(), &str>` - A result that is Ok, or an error message.
 pub fn migrate_down(path: Option<String>) -> Result<(), &'static str> {
-    let path = match path {
-        Some(p) => p,
-        None => String::from(DB_PATH),
-    };
+    let path = path.unwrap_or_else(|| String::from(DB_PATH));
     let migration = TestArea::new(path);
-    match migration.down() {
-        Ok(_) => (),
-        Err(e) => return handle_migration_error(migration.name, e),
-    };
+    migration.down().map_err(|e| handle_migration_error(migration.name, e))?;
     let migration = CreateMapMigration::new(migration.path);
-    match migration.down() {
-        Ok(_) => (),
-        Err(e) => return handle_migration_error(migration.name, e),
-    };
+    migration.down().map_err(|e| handle_migration_error(migration.name, e))?;
     Ok(())
 }
 
@@ -280,7 +247,6 @@ mod tests {
     #[test]
     fn handle_migration_error_test() {
         let result = handle_migration_error(String::from("Test"), "Error");
-        assert_eq!(result, Err("Migration Error"));
+        assert_eq!(result, "Migration Error");
     }
 }
-
