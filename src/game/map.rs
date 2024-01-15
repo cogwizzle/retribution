@@ -209,8 +209,12 @@ pub fn load_map(map_name: &str, path: Option<String>) -> Result<Map, &str> {
     };
     let path = path.replace("~", std::env::var("HOME").unwrap().as_str());
     let conn = Connection::open(path.as_str()).map_err(|_| "Unable to open database.")?;
-    let mut stmt = conn.prepare("SELECT name, grid FROM maps WHERE name = ?1").map_err(|_| "Unable to prepare statement.")?;
-    let mut rows = stmt.query(&[&map_name]).map_err(|_| "Unable to query database.")?;
+    let mut stmt = conn
+        .prepare("SELECT name, grid FROM maps WHERE name = ?1")
+        .map_err(|_| "Unable to prepare statement.")?;
+    let mut rows = stmt
+        .query(&[&map_name])
+        .map_err(|_| "Unable to query database.")?;
     let row = match rows.next() {
         Ok(Some(r)) => r,
         Ok(None) => return Err("No map found."),
@@ -218,7 +222,8 @@ pub fn load_map(map_name: &str, path: Option<String>) -> Result<Map, &str> {
     };
     let name = row.get(0).map_err(|_| "Unable to get name.")?;
     let grid_string: String = row.get(1).map_err(|_| "Unable to get grid.")?;
-    let grid: Vec<Vec<Option<GridSquare>>> = serde_json::from_str(grid_string.as_str()).map_err(|_| "Unable to deserialize grid.")?;
+    let grid: Vec<Vec<Option<GridSquare>>> =
+        serde_json::from_str(grid_string.as_str()).map_err(|_| "Unable to deserialize grid.")?;
     Ok(Map { name, grid })
 }
 
@@ -282,12 +287,12 @@ mod tests {
     }
 
     #[test]
-     fn load_map_test() {
-         // Create an in memory database.
-         crate::migration::map::migrate_up(Some(String::from("test.db"))).unwrap();
-         let map = load_map("Test Area", Some(String::from("test.db"))).unwrap();
-         std::fs::remove_file("test.db").unwrap();
-         assert_eq!(map.name, "Test Area");
-         assert_eq!(map.grid.len(), 3);
-     }
+    fn load_map_test() {
+        // Create an in memory database.
+        crate::migration::map::migrate_up(Some(String::from("test.db"))).unwrap();
+        let map = load_map("Test Area", Some(String::from("test.db"))).unwrap();
+        std::fs::remove_file("test.db").unwrap();
+        assert_eq!(map.name, "Test Area");
+        assert_eq!(map.grid.len(), 3);
+    }
 }
