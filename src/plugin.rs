@@ -75,7 +75,6 @@ impl StateWriter {
     /// # Returns
     /// * `Result<(), String>` - The result of writing the state to the plugin file.
     pub fn write_state(&self, state: state::GameState) -> Result<(), String> {
-        println!("write_state");
         // spawn a thread to write the state to the plugin file.
         let output_file = self.output_file.clone();
         let state_clone = state.clone();
