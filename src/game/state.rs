@@ -4,7 +4,7 @@ use crate::game::map;
 use serde::{Deserialize, Serialize};
 
 /// A module that contains the state of the game.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct GameState {
     /// The current mode of the game.
     pub mode: Mode,
@@ -37,7 +37,7 @@ impl GameState {
 }
 
 /// An enum that represents the mode of the game.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Mode {
     Combat,
     Menu,
