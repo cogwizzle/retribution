@@ -209,8 +209,12 @@ pub fn load_map(map_name: &str, path: Option<String>) -> Result<Map, &str> {
     };
     let path = path.replace("~", std::env::var("HOME").unwrap().as_str());
     let conn = Connection::open(path.as_str()).map_err(|_| "Unable to open database.")?;
-    let mut stmt = conn.prepare("SELECT name, grid FROM maps WHERE name = ?1").map_err(|_| "Unable to prepare statement.")?;
-    let mut rows = stmt.query(&[&map_name]).map_err(|_| "Unable to query database.")?;
+    let mut stmt = conn
+        .prepare("SELECT name, grid FROM maps WHERE name = ?1")
+        .map_err(|_| "Unable to prepare statement.")?;
+    let mut rows = stmt
+        .query(&[&map_name])
+        .map_err(|_| "Unable to query database.")?;
     let row = match rows.next() {
         Ok(Some(r)) => r,
         Ok(None) => return Err("No map found."),
@@ -218,7 +222,8 @@ pub fn load_map(map_name: &str, path: Option<String>) -> Result<Map, &str> {
     };
     let name = row.get(0).map_err(|_| "Unable to get name.")?;
     let grid_string: String = row.get(1).map_err(|_| "Unable to get grid.")?;
-    let grid: Vec<Vec<Option<GridSquare>>> = serde_json::from_str(grid_string.as_str()).map_err(|_| "Unable to deserialize grid.")?;
+    let grid: Vec<Vec<Option<GridSquare>>> =
+        serde_json::from_str(grid_string.as_str()).map_err(|_| "Unable to deserialize grid.")?;
     Ok(Map { name, grid })
 }
 
@@ -229,65 +234,17 @@ pub enum GridSquare {
     Portal(Portal),
 }
 
-/// Macro for creating a grid square that is a room, and takes in two string slices.
-#[macro_export]
-macro_rules! room {
-    ($name:expr, $description:expr) => {
-        GridSquare::Room(Room::new(String::from($name), String::from($description)))
-    };
-}
-
-/// Macro for creating a grid square that is a portal, and takes in two string slices and a tuple
-/// of i32s
-#[macro_export]
-macro_rules! portal {
-    ($name:expr, $target:expr, $location:expr) => {
-        GridSquare::Portal(Portal::new(
-            String::from($name),
-            String::from($target),
-            $location,
-        ))
-    };
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    /// Test the grid room macro.
     #[test]
-    fn create_a_grid_room() {
-        let room = room!("Test Room", "This is a test room.");
-        assert_eq!(
-            GridSquare::Room(Room::new(
-                String::from("Test Room"),
-                String::from("This is a test room.")
-            )),
-            room
-        );
+    fn load_map_test() {
+        // Create an in memory database.
+        crate::migration::map::migrate_up(Some(String::from("test.db"))).unwrap();
+        let map = load_map("Test Area", Some(String::from("test.db"))).unwrap();
+        std::fs::remove_file("test.db").unwrap();
+        assert_eq!(map.name, "Test Area");
+        assert_eq!(map.grid.len(), 3);
     }
-
-    /// Test the grid portal macro.
-    #[test]
-    fn create_a_grid_portal() {
-        let portal = portal!("Test Portal", "Test Area", (1, 1));
-        assert_eq!(
-            GridSquare::Portal(Portal::new(
-                String::from("Test Portal"),
-                String::from("Test Area"),
-                (1, 1)
-            )),
-            portal
-        );
-    }
-
-    #[test]
-     fn load_map_test() {
-         // Create an in memory database.
-         crate::migration::map::migrate_up(Some(String::from("test.db"))).unwrap();
-         let map = load_map("Test Area", Some(String::from("test.db"))).unwrap();
-         std::fs::remove_file("test.db").unwrap();
-         assert_eq!(map.name, "Test Area");
-         assert_eq!(map.grid.len(), 3);
-     }
 }
